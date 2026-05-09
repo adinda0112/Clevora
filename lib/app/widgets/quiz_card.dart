@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import '../theme/app_theme.dart';
+import 'package:clevora/app/theme/app_theme.dart';
 
 class QuizCard extends StatelessWidget {
   final String title;

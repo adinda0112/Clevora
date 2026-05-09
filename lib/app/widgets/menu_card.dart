@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import 'package:clevora/app/theme/app_theme.dart';
 
 class MenuCard extends StatelessWidget {
   final IconData icon;
