@@ -5,7 +5,7 @@ class GenerateFormController extends GetxController {
   final generateType = ''.obs;
   
   final mataPelajaran = ''.obs;
-  final kelas = ''.obs;
+  final kelas = 'X'.obs;
   final topik = ''.obs;
   final tingkatKesulitan = 'Sedang'.obs;
   final jumlahSoal = '10'.obs;
@@ -23,6 +23,7 @@ class GenerateFormController extends GetxController {
     Get.toNamed(Routes.GENERATING_STATE, arguments: {
       'type': generateType.value,
       'topik': topik.value.isEmpty ? 'Topik Umum' : topik.value,
+      'kelas': kelas.value,
     });
   }
 }

@@ -9,6 +9,7 @@ abstract class Routes {
   static const QUIZ_MANAGEMENT = '/quiz-management';
   static const REPORT = '/report';
   static const PROFILE = '/profile';
+  static const EDIT_PROFILE = '/edit-profile';
   
   static const MODULE_AI = '/module-ai';
   static const GENERATE_FORM = '/generate-form';

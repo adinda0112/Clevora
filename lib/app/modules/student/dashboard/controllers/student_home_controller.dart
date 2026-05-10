@@ -26,20 +26,20 @@ class StudentHomeController extends GetxController {
   ].obs;
 
   final menuItems = <Map<String, dynamic>>[
-    {
-      'title': 'Progress Belajar',
-      'subtitle': 'Lanjutkan materi',
-      'icon': Icons.trending_up,
-      'bg': AppColors.lightPurple,
-      'text': AppColors.darkPurple,
-    },
-    {
-      'title': 'Quiz Aktif',
-      'subtitle': 'Ada 2 quiz',
-      'icon': Icons.timer_outlined,
-      'bg': AppColors.lightTeal,
-      'text': const Color(0xFF085041),
-    },
+    // {
+    //   'title': 'Progress Belajar',
+    //   'subtitle': 'Lanjutkan materi',
+    //   'icon': Icons.trending_up,
+    //   'bg': AppColors.lightPurple,
+    //   'text': AppColors.darkPurple,
+    // },
+    // {
+    //   'title': 'Quiz Aktif',
+    //   'subtitle': 'Ada 2 quiz',
+    //   'icon': Icons.timer_outlined,
+    //   'bg': AppColors.lightTeal,
+    //   'text': const Color(0xFF085041),
+    // },
     {
       'title': 'Materi Terbaru',
       'subtitle': 'Modul algoritma',

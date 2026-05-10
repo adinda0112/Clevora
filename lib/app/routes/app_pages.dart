@@ -45,6 +45,8 @@ import 'package:clevora/app/modules/student/student_result/views/student_result_
 // Shared
 import 'package:clevora/app/modules/shared/profile/bindings/profile_binding.dart';
 import 'package:clevora/app/modules/shared/profile/views/profile_view.dart';
+import 'package:clevora/app/modules/shared/edit_profile/views/edit_profile_view.dart';
+import 'package:clevora/app/modules/shared/edit_profile/bindings/edit_profile_binding.dart';
 
 class AppPages {
   static const INITIAL = Routes.SPLASH;
@@ -79,5 +81,6 @@ class AppPages {
     
     // Shared
     GetPage(name: Routes.PROFILE, page: () => const ProfileView(), binding: ProfileBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.EDIT_PROFILE, page: () => EditProfileView(), binding: EditProfileBinding(), transition: Transition.rightToLeft),
   ];
 }

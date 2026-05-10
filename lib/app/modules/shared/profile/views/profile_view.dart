@@ -11,9 +11,22 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text(
+          'Profil',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color.fromARGB(255, 60, 52, 137),
+        elevation: 0,
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.white),
+            onPressed: () {
+              Get.toNamed('/edit-profile');
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -131,7 +144,10 @@ class ProfileView extends GetView<ProfileController> {
                 ),
                 onPressed: () => Get.offAllNamed(Routes.LOGIN),
                 icon: const Icon(Icons.logout, color: Colors.white),
-                label: const Text('Logout', style: TextStyle(color: Colors.white)),
+                label: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

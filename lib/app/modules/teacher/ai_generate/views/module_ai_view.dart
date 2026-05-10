@@ -10,8 +10,8 @@ class ModuleAiView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.grey50,
       appBar: AppBar(
-        title: const Text('Clevora AI', style: TextStyle(color: AppColors.darkPurple, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
+        title: const Text('Clevora AI', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold)),
+        backgroundColor: const Color.fromARGB(255, 60, 52, 137),
         elevation: 0,
       ),
       body: SingleChildScrollView(

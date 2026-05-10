@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:gap/gap.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/teacher/ai_generate/controllers/generate_form_controller.dart';
+import 'package:clevora/app/modules/teacher/ai_generate/views/module_ai_view.dart';
 
 class GenerateFormView extends GetView<GenerateFormController> {
   const GenerateFormView({super.key});
@@ -12,7 +13,18 @@ class GenerateFormView extends GetView<GenerateFormController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Obx(() => Text('Generate ${controller.generateType.value}', style: const TextStyle(color: AppColors.darkPurple, fontSize: 16))),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.darkPurple),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        title: Obx(
+          () => Text(
+            'Generate ${controller.generateType.value}',
+            style: const TextStyle(color: AppColors.darkPurple, fontSize: 16),
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.darkPurple),
@@ -23,28 +35,48 @@ class GenerateFormView extends GetView<GenerateFormController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildLabel('Mata Pelajaran'),
-            _buildTextField(hint: 'Contoh: Informatika', onChanged: (v) => controller.mataPelajaran.value = v),
+            _buildTextField(
+              hint: 'Contoh: Informatika',
+              onChanged: (v) => controller.mataPelajaran.value = v,
+            ),
             const Gap(16),
-            
+
             _buildLabel('Kelas'),
-            _buildTextField(hint: 'Contoh: X RPL', onChanged: (v) => controller.kelas.value = v),
+            Obx(
+              () => DropdownButtonFormField<String>(
+                value: controller.kelas.value,
+                decoration: _inputDecoration(),
+                items: ['X', 'XI', 'XII'].map((String val) {
+                  return DropdownMenuItem(value: val, child: Text(val));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) controller.kelas.value = val;
+                },
+              ),
+            ),
             const Gap(16),
-            
+
             _buildLabel('Topik / Materi Pokok'),
-            _buildTextField(hint: 'Contoh: Algoritma Pemrograman', maxLines: 3, onChanged: (v) => controller.topik.value = v),
+            _buildTextField(
+              hint: 'Contoh: Algoritma Pemrograman',
+              maxLines: 3,
+              onChanged: (v) => controller.topik.value = v,
+            ),
             const Gap(16),
-            
+
             _buildLabel('Tingkat Kesulitan'),
-            Obx(() => DropdownButtonFormField<String>(
-              value: controller.tingkatKesulitan.value,
-              decoration: _inputDecoration(),
-              items: ['Mudah', 'Sedang', 'Sulit', 'HOTS'].map((String val) {
-                return DropdownMenuItem(value: val, child: Text(val));
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) controller.tingkatKesulitan.value = val;
-              },
-            )),
+            Obx(
+              () => DropdownButtonFormField<String>(
+                value: controller.tingkatKesulitan.value,
+                decoration: _inputDecoration(),
+                items: ['Mudah', 'Sedang', 'Sulit', 'HOTS'].map((String val) {
+                  return DropdownMenuItem(value: val, child: Text(val));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) controller.tingkatKesulitan.value = val;
+                },
+              ),
+            ),
             const Gap(16),
 
             Obx(() {
@@ -83,10 +115,19 @@ class GenerateFormView extends GetView<GenerateFormController> {
           child: ElevatedButton.icon(
             onPressed: controller.startGenerate,
             icon: const Icon(Icons.auto_awesome, color: Colors.white),
-            label: const Text('Generate dengan AI', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            label: const Text(
+              'Generate dengan AI',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryPurple,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         ),
@@ -97,11 +138,21 @@ class GenerateFormView extends GetView<GenerateFormController> {
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.darkPurple)),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkPurple,
+        ),
+      ),
     );
   }
 
-  Widget _buildTextField({required String hint, int maxLines = 1, required Function(String) onChanged}) {
+  Widget _buildTextField({
+    required String hint,
+    int maxLines = 1,
+    required Function(String) onChanged,
+  }) {
     return TextField(
       maxLines: maxLines,
       onChanged: onChanged,

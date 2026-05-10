@@ -8,7 +8,11 @@ class QuizManagementView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Quiz Management', style: TextStyle(color: AppColors.darkPurple))),
+      appBar: AppBar(
+        title: const Text('Quiz Management', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold)),
+        backgroundColor: const Color.fromARGB(255, 60, 52, 137),
+        elevation: 0,
+      ),
       body: const Center(child: Text('Kelola Pretest, Posttest, Ujian (Teacher)')),
     );
   }
