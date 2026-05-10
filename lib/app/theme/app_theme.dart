@@ -1,179 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color purple = Color(0xFF534AB7);
-  static const Color purpleDark = Color(0xFF26215C);
-  static const Color purpleLight = Color(0xFFEEEDFE);
+  static const Color primaryPurple = Color(0xFF7F77DD);
+  static const Color darkPurple = Color(0xFF3C3489);
+  static const Color lightPurple = Color(0xFFEEEDFE);
   static const Color teal = Color(0xFF1D9E75);
-  static const Color tealLight = Color(0xFFE1F5EE);
+  static const Color lightTeal = Color(0xFFE1F5EE);
   static const Color amber = Color(0xFFEF9F27);
-  static const Color error = Color(0xFFE24B4A);
+  static const Color lightAmber = Color(0xFFFAEEDA);
+  static const Color coral = Color(0xFFD85A30);
+  static const Color lightCoral = Color(0xFFFAECE7);
+  static const Color red = Color(0xFFE24B4A);
   static const Color grey50 = Color(0xFFF9FAFB);
   static const Color grey200 = Color(0xFFE5E7EB);
   static const Color grey400 = Color(0xFF9CA3AF);
   static const Color grey600 = Color(0xFF4B5563);
   static const Color grey900 = Color(0xFF111827);
+  static const grey100 = Color(0xFFF3F4F6);
+static const grey300 = Color(0xFFD1D5DB);
+static const grey500 = Color(0xFF6B7280);
+static const grey700 = Color(0xFF374151);
+static const grey800 = Color(0xFF1F2937);
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primaryPurple, darkPurple],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static List<BoxShadow> get cardShadow => [
+        BoxShadow(
+          color: grey900.withOpacity(0.05),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
+      ];
 }
 
 class AppTheme {
   static ThemeData get light {
+    final textTheme = GoogleFonts.nunitoTextTheme().apply(
+      bodyColor: AppColors.grey900,
+      displayColor: AppColors.grey900,
+    );
+
     return ThemeData(
       useMaterial3: true,
-      fontFamily: 'Nunito',
+      textTheme: textTheme,
       brightness: Brightness.light,
-      primaryColor: AppColors.purple,
-      scaffoldBackgroundColor: Colors.white,
-      appBarTheme: const AppBarTheme(
+      primaryColor: AppColors.primaryPurple,
+      scaffoldBackgroundColor: AppColors.grey50,
+      
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.grey900),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: AppColors.grey900),
+        titleTextStyle: GoogleFonts.nunito(
           color: AppColors.grey900,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w700,
         ),
       ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.purple,
+          backgroundColor: AppColors.primaryPurple,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.nunito(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Nunito',
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.purple,
-          side: const BorderSide(color: AppColors.purple, width: 1.5),
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Nunito',
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.purple,
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Nunito',
-          ),
-        ),
-      ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.grey50,
-        hintStyle: const TextStyle(
+        fillColor: Colors.white,
+        hintStyle: GoogleFonts.nunito(
           color: AppColors.grey400,
           fontSize: 14,
-          fontFamily: 'Nunito',
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
+          horizontal: 20,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.grey200),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.grey200),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.purple, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primaryPurple, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
-        ),
-      ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        displaySmall: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        titleSmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Nunito',
-          color: AppColors.grey600,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Nunito',
-          color: AppColors.grey900,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Nunito',
-          color: AppColors.grey600,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Nunito',
-          color: AppColors.grey600,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.red),
         ),
       ),
     );
