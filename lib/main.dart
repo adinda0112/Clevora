@@ -5,6 +5,8 @@ import 'package:get_storage/get_storage.dart';
 import 'app/routes/app_pages.dart';
 import 'app/theme/app_theme.dart';
 
+import 'package:clevora/app/data/services/auth_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
@@ -17,7 +19,8 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-
+  
+  Get.put(AuthService(), permanent: true);
   runApp(const ClevoraApp());
 }
 

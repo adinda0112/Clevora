@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:clevora/app/routes/app_routes.dart';
+import 'package:clevora/app/data/services/auth_service.dart';
 
 class RegisterController extends GetxController {
   final currentStep = 0.obs;
@@ -21,6 +23,8 @@ class RegisterController extends GetxController {
 
   final selectedJenjang = 'SMA'.obs;
   final jenjangOptions = ['SD', 'SMP', 'SMA', 'SMK'];
+
+  final AuthService _authService = Get.find<AuthService>();
 
   @override
   void onInit() {
@@ -55,8 +59,8 @@ class RegisterController extends GetxController {
   }
 
   void nextStep() {
-    if (currentStep.value < 2) {
-      currentStep.value++;
+    if (currentStep.value == 0) {
+      currentStep.value = 1;
     } else {
       register();
     }
@@ -64,14 +68,137 @@ class RegisterController extends GetxController {
 
   void prevStep() {
     if (currentStep.value > 0) {
-      currentStep.value--;
+      currentStep.value = 0;
     }
   }
 
-  void register() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 1));
-    isLoading.value = false;
-    Get.toNamed(Routes.OTP, arguments: {'email': emailController.text});
+  Future<void> register() async {
+    final nama = namaController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmPass = confirmPasswordController.text.trim();
+    final role = selectedRole.value;
+    final nip = role == 'guru' ? nipController.text.trim() : null;
+    final mapel = selectedMapel.value;
+    final jenjang = selectedJenjang.value;
+
+    if (nama.isEmpty) {
+      Get.snackbar(
+        "Peringatan",
+        "Nama lengkap tidak boleh kosong",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (email.isEmpty) {
+      Get.snackbar(
+        "Peringatan",
+        "Email tidak boleh kosong",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (!EmailValidator.validate(email)) {
+      Get.snackbar(
+        "Peringatan",
+        "Format email tidak valid",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (role == 'guru' && (nip == null || nip.isEmpty)) {
+      Get.snackbar(
+        "Peringatan",
+        "NIP tidak boleh kosong untuk guru",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (password.isEmpty) {
+      Get.snackbar(
+        "Peringatan",
+        "Password tidak boleh kosong",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      Get.snackbar(
+        "Peringatan",
+        "Password minimal harus 8 karakter",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    if (password != confirmPass) {
+      Get.snackbar(
+        "Peringatan",
+        "Konfirmasi password tidak sesuai",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber.shade100,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final success = await _authService.register(
+        nama: nama,
+        email: email,
+        password: password,
+        role: role,
+        nip: nip,
+        mapel: mapel,
+        jenjang: jenjang,
+      );
+
+      if (success) {
+        Get.snackbar(
+          "Registrasi Berhasil",
+          "Silakan masukkan kode OTP yang telah dikirim ke email Anda",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade900,
+        );
+        Get.toNamed(Routes.OTP, arguments: {'email': email});
+      } else {
+        Get.snackbar(
+          "Registrasi Gagal",
+          "Terjadi kesalahan saat membuat akun Anda",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Registrasi Gagal",
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

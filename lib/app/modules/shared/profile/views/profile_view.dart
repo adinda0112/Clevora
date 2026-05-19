@@ -142,7 +142,7 @@ class ProfileView extends GetView<ProfileController> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () => Get.offAllNamed(Routes.LOGIN),
+                onPressed: () => controller.logout(),
                 icon: const Icon(Icons.logout, color: Colors.white),
                 label: const Text(
                   'Logout',
