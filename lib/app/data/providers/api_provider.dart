@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' as getx;
 import 'package:get_storage/get_storage.dart';
 import 'package:clevora/app/routes/api.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 class ApiProvider {
   late final Dio dio;
@@ -29,7 +31,13 @@ class ApiProvider {
           return handler.next(options);
         },
         onError: (DioException e, handler) {
-          // General error handler - can capture 401 and trigger logout if needed
+          // Global 401 Unauthorized / Token Expired handler
+          if (e.response?.statusCode == 401) {
+            _storage.remove('token');
+            _storage.remove('user');
+            // Safely redirect to Login view
+            getx.Get.offAllNamed(Routes.LOGIN);
+          }
           return handler.next(e);
         },
       ),

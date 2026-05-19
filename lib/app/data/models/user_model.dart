@@ -4,6 +4,13 @@ class UserModel {
   final String email;
   final String role;
   final String? nip;
+  final String? nisn;
+  final String? kelas;
+  final String? sekolah;
+  final String? fotoWajahUrl;
+  final bool sudahDaftarWajah;
+  final bool isVerified;
+  final String? fcmToken;
   final String? mapel;
   final String? jenjang;
 
@@ -13,6 +20,13 @@ class UserModel {
     required this.email,
     required this.role,
     this.nip,
+    this.nisn,
+    this.kelas,
+    this.sekolah,
+    this.fotoWajahUrl,
+    this.sudahDaftarWajah = false,
+    this.isVerified = false,
+    this.fcmToken,
     this.mapel,
     this.jenjang,
   });
@@ -24,6 +38,13 @@ class UserModel {
       email: json['email'] ?? '',
       role: json['role'] ?? '',
       nip: json['nip'],
+      nisn: json['nisn'],
+      kelas: json['kelas'],
+      sekolah: json['sekolah'],
+      fotoWajahUrl: json['foto_wajah_url'] ?? json['fotoWajahUrl'],
+      sudahDaftarWajah: json['sudah_daftar_wajah'] ?? json['sudahDaftarWajah'] ?? false,
+      isVerified: json['is_verified'] ?? json['isVerified'] ?? false,
+      fcmToken: json['fcm_token'] ?? json['fcmToken'],
       mapel: json['mapel'],
       jenjang: json['jenjang'],
     );
@@ -36,6 +57,13 @@ class UserModel {
       'email': email,
       'role': role,
       'nip': nip,
+      'nisn': nisn,
+      'kelas': kelas,
+      'sekolah': sekolah,
+      'foto_wajah_url': fotoWajahUrl,
+      'sudah_daftar_wajah': sudahDaftarWajah,
+      'is_verified': isVerified,
+      'fcm_token': fcmToken,
       'mapel': mapel,
       'jenjang': jenjang,
     };
@@ -56,14 +84,16 @@ class AuthResponse {
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'];
+    final dynamic data = json['data'];
+    final dynamic userJson = data != null ? data['user'] : json['user'];
+    final String? tokenStr = data != null ? data['token'] : json['token'];
+    final bool successVal = json['success'] ?? (tokenStr != null);
+
     return AuthResponse(
-      success: json['success'] ?? false,
+      success: successVal,
       message: json['message'] ?? '',
-      user: data != null && data['user'] != null 
-          ? UserModel.fromJson(data['user']) 
-          : null,
-      token: data != null ? data['token'] : null,
+      user: userJson != null ? UserModel.fromJson(userJson) : null,
+      token: tokenStr,
     );
   }
 }

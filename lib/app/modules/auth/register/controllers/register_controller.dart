@@ -17,6 +17,9 @@ class RegisterController extends GetxController {
   late final TextEditingController passwordController;
   late final TextEditingController confirmPasswordController;
   late final TextEditingController nipController;
+  late final TextEditingController nisnController;
+  late final TextEditingController kelasController;
+  late final TextEditingController sekolahController;
 
   final selectedMapel = 'Informatika'.obs;
   final mapelOptions = ['Informatika', 'Matematika', 'Bahasa Inggris', 'Fisika'];
@@ -34,6 +37,9 @@ class RegisterController extends GetxController {
     passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
     nipController = TextEditingController();
+    nisnController = TextEditingController();
+    kelasController = TextEditingController();
+    sekolahController = TextEditingController();
   }
 
   @override
@@ -43,6 +49,9 @@ class RegisterController extends GetxController {
     passwordController.dispose();
     confirmPasswordController.dispose();
     nipController.dispose();
+    nisnController.dispose();
+    kelasController.dispose();
+    sekolahController.dispose();
     super.onClose();
   }
 
@@ -79,6 +88,9 @@ class RegisterController extends GetxController {
     final confirmPass = confirmPasswordController.text.trim();
     final role = selectedRole.value;
     final nip = role == 'guru' ? nipController.text.trim() : null;
+    final nisn = role == 'siswa' ? nisnController.text.trim() : null;
+    final kelas = role == 'siswa' ? kelasController.text.trim() : null;
+    final sekolah = role == 'siswa' ? sekolahController.text.trim() : null;
     final mapel = selectedMapel.value;
     final jenjang = selectedJenjang.value;
 
@@ -126,6 +138,39 @@ class RegisterController extends GetxController {
       return;
     }
 
+    if (role == 'siswa') {
+      if (nisn == null || nisn.isEmpty) {
+        Get.snackbar(
+          "Peringatan",
+          "NISN tidak boleh kosong untuk siswa",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.amber.shade100,
+          colorText: Colors.black87,
+        );
+        return;
+      }
+      if (kelas == null || kelas.isEmpty) {
+        Get.snackbar(
+          "Peringatan",
+          "Kelas tidak boleh kosong untuk siswa",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.amber.shade100,
+          colorText: Colors.black87,
+        );
+        return;
+      }
+      if (sekolah == null || sekolah.isEmpty) {
+        Get.snackbar(
+          "Peringatan",
+          "Sekolah tidak boleh kosong untuk siswa",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.amber.shade100,
+          colorText: Colors.black87,
+        );
+        return;
+      }
+    }
+
     if (password.isEmpty) {
       Get.snackbar(
         "Peringatan",
@@ -167,6 +212,9 @@ class RegisterController extends GetxController {
         password: password,
         role: role,
         nip: nip,
+        nisn: nisn,
+        kelas: kelas,
+        sekolah: sekolah,
         mapel: mapel,
         jenjang: jenjang,
       );

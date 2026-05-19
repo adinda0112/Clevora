@@ -342,7 +342,7 @@ class _Step1DataForm extends StatelessWidget {
         ),
         const Gap(20),
 
-        // NIP (conditional untuk guru)
+        // NIP (conditional untuk guru) atau NISN, Kelas, Sekolah (conditional untuk siswa)
         Obx(() {
           if (controller.selectedRole.value == 'guru') {
             return Column(
@@ -363,8 +363,53 @@ class _Step1DataForm extends StatelessWidget {
                 const Gap(20),
               ],
             );
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('NISN', style: Theme.of(context).textTheme.titleMedium),
+                const Gap(8),
+                TextField(
+                  controller: controller.nisnController,
+                  decoration: const InputDecoration(
+                    hintText: 'Nomor Induk Siswa Nasional',
+                    prefixIcon: Icon(
+                      Icons.badge_outlined,
+                      color: AppColors.grey400,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const Gap(20),
+                Text('Kelas', style: Theme.of(context).textTheme.titleMedium),
+                const Gap(8),
+                TextField(
+                  controller: controller.kelasController,
+                  decoration: const InputDecoration(
+                    hintText: 'Contoh: XI IPA 1',
+                    prefixIcon: Icon(
+                      Icons.class_outlined,
+                      color: AppColors.grey400,
+                    ),
+                  ),
+                ),
+                const Gap(20),
+                Text('Sekolah', style: Theme.of(context).textTheme.titleMedium),
+                const Gap(8),
+                TextField(
+                  controller: controller.sekolahController,
+                  decoration: const InputDecoration(
+                    hintText: 'Nama Sekolah asal',
+                    prefixIcon: Icon(
+                      Icons.school_outlined,
+                      color: AppColors.grey400,
+                    ),
+                  ),
+                ),
+                const Gap(20),
+              ],
+            );
           }
-          return const SizedBox.shrink();
         }),
 
         // Mapel Dropdown

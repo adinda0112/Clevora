@@ -65,6 +65,9 @@ class AuthService extends GetxService {
     required String password,
     required String role,
     String? nip,
+    String? nisn,
+    String? kelas,
+    String? sekolah,
     String? mapel,
     String? jenjang,
   }) async {
@@ -80,13 +83,26 @@ class AuthService extends GetxService {
       if (nip != null && nip.isNotEmpty) {
         data['nip'] = nip;
       }
+      if (nisn != null && nisn.isNotEmpty) {
+        data['nisn'] = nisn;
+      }
+      if (kelas != null && kelas.isNotEmpty) {
+        data['kelas'] = kelas;
+      }
+      if (sekolah != null && sekolah.isNotEmpty) {
+        data['sekolah'] = sekolah;
+      }
 
       final response = await _apiProvider.dio.post(
         '/auth/register',
         data: data,
       );
 
-      return response.data['success'] ?? false;
+      final dynamic resData = response.data;
+      if (resData is Map) {
+        return resData['success'] ?? false;
+      }
+      return false;
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {

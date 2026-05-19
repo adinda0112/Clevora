@@ -83,9 +83,11 @@ class ProfileView extends GetView<ProfileController> {
                 ],
               ),
               const Gap(28),
-              const Text(
-                'Teacher information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              Obx(
+                () => Text(
+                  controller.role.value == 'Guru' ? 'Informasi Guru' : 'Informasi Siswa',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                ),
               ),
               const Gap(14),
               Container(
