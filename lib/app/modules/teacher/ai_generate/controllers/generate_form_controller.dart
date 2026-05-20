@@ -20,10 +20,15 @@ class GenerateFormController extends GetxController {
   }
 
   void startGenerate() {
+    final additional = 'Tingkat Kesulitan: ${tingkatKesulitan.value}' + 
+        (generateType.value == 'Quiz' ? ', Jumlah Soal: ${jumlahSoal.value}' : '');
+        
     Get.toNamed(Routes.GENERATING_STATE, arguments: {
       'type': generateType.value,
       'topik': topik.value.isEmpty ? 'Topik Umum' : topik.value,
       'kelas': kelas.value,
+      'mapel': mataPelajaran.value.isEmpty ? 'Informatika' : mataPelajaran.value,
+      'additionalPrompt': additional,
     });
   }
 }

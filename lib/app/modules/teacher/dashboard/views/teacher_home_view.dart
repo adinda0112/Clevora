@@ -6,6 +6,7 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/widgets/menu_card.dart';
 import 'package:clevora/app/widgets/stat_card.dart';
 import 'package:clevora/app/modules/teacher/dashboard/controllers/teacher_home_controller.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 class TeacherHomeView extends GetView<TeacherHomeController> {
   const TeacherHomeView({super.key});
@@ -138,9 +139,20 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           backgroundColor: item['bg'],
                           textColor: item['text'],
                           onTap: () {
-                            Get.snackbar('Informasi', 'Menu ${item['title']} ditekan',
+                            if (index == 0) {
+                              Get.toNamed(Routes.MODULE_AI);
+                            } else if (index == 2) {
+                              Get.toNamed(Routes.QUIZ_MANAGEMENT);
+                            } else if (index == 3) {
+                              Get.toNamed(Routes.REPORT);
+                            } else {
+                              Get.snackbar(
+                                'Informasi',
+                                'Menu ${item['title']} akan segera hadir!',
                                 snackPosition: SnackPosition.BOTTOM,
-                                margin: const EdgeInsets.all(10));
+                                margin: const EdgeInsets.all(10),
+                              );
+                            }
                           },
                         );
                       },

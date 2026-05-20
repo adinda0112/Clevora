@@ -213,24 +213,14 @@ class LoginView extends GetView<LoginController> {
                   const Gap(20),
 
                   // Social Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _SocialButton(
-                          icon: Icons.g_translate,
-                          label: 'Google',
-                          onTap: () {},
-                        ),
-                      ),
-                      const Gap(12),
-                      Expanded(
-                        child: _SocialButton(
-                          icon: Icons.language,
-                          label: 'Microsoft',
-                          onTap: () {},
-                        ),
-                      ),
-                    ],
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: _SocialButton(
+                      icon: Icons.g_mobiledata_rounded,
+                      label: 'Google',
+                      onTap: () => controller.handleGoogleSignIn(),
+                    ),
                   ),
                   const Gap(24),
 
@@ -330,9 +320,28 @@ class _SocialButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.grey800,
+        side: const BorderSide(color: AppColors.grey300),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 20), const Gap(8), Text(label)],
+        children: [
+          Icon(icon, size: 24, color: AppColors.primaryPurple),
+          const Gap(10),
+          Text(
+            'Masuk dengan $label',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.grey800,
+            ),
+          )
+        ],
       ),
     );
   }

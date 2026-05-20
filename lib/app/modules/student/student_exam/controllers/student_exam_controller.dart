@@ -1,58 +1,52 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:clevora/app/data/models/quiz_model.dart';
+import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
+import 'package:clevora/app/theme/app_theme.dart';
 
-class StudentExamController extends GetxController {
+class StudentExamController extends GetxController with WidgetsBindingObserver {
+  final QuizService _quizService = Get.find<QuizService>();
+
+  final quiz = Rxn<QuizModel>();
   final warningCount = 0.obs;
   final currentQuestionIndex = 0.obs;
-  final timeRemaining = 3600.obs; // 60 minutes in seconds
+  final timeRemaining = 1800.obs; // Default 30 min in seconds
+  final isSubmitting = false.obs;
 
   Timer? _timer;
 
-  final questions = <Map<String, dynamic>>[
-    {
-      'question': 'Apa yang dimaksud dengan Primary Key dalam basis data?',
-      'options': [
-        'A. Kunci yang digunakan untuk menghubungkan dua tabel',
-        'B. Kunci yang unik untuk setiap baris dalam tabel',
-        'C. Kunci yang boleh memiliki nilai null',
-        'D. Kunci untuk mengenkripsi data'
-      ],
-      'selected': Rxn<int>(),
-    },
-    {
-      'question': 'Perintah SQL untuk mengambil data dari database adalah...',
-      'options': [
-        'A. GET',
-        'B. OPEN',
-        'C. EXTRACT',
-        'D. SELECT'
-      ],
-      'selected': Rxn<int>(),
-    },
-    {
-      'question': 'Tipe data yang paling tepat untuk menyimpan teks panjang adalah...',
-      'options': [
-        'A. VARCHAR',
-        'B. INT',
-        'C. TEXT',
-        'D. BOOLEAN'
-      ],
-      'selected': Rxn<int>(),
-    }
-  ];
+  // Reactively track selected answers for each question (-1 means unselected)
+  final selectedAnswers = <int>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+    final args = Get.arguments as QuizModel?;
+    if (args != null) {
+      quiz.value = args;
+      timeRemaining.value = args.durasi * 60;
+      // Initialize selected answers with -1
+      selectedAnswers.assignAll(List.generate(args.soal.length, (_) => -1));
+    }
     startTimer();
   }
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      simulateWarning();
+    }
   }
 
   void startTimer() {
@@ -73,11 +67,13 @@ class StudentExamController extends GetxController {
   }
 
   void selectOption(int index) {
-    questions[currentQuestionIndex.value]['selected'].value = index;
+    if (currentQuestionIndex.value < selectedAnswers.length) {
+      selectedAnswers[currentQuestionIndex.value] = index;
+    }
   }
 
   void nextQuestion() {
-    if (currentQuestionIndex.value < questions.length - 1) {
+    if (quiz.value != null && currentQuestionIndex.value < quiz.value!.soal.length - 1) {
       currentQuestionIndex.value++;
     }
   }
@@ -103,18 +99,7 @@ class StudentExamController extends GetxController {
 
     if (warningCount.value >= 3) {
       _timer?.cancel();
-      Get.defaultDialog(
-        title: 'Ujian Dihentikan',
-        middleText: 'Anda telah mencapai batas maksimal pelanggaran (3/3). Ujian otomatis diakhiri.',
-        barrierDismissible: false,
-        confirm: ElevatedButton(
-          onPressed: () {
-            Get.back();
-            Get.offAllNamed(Routes.STUDENT_RESULT);
-          },
-          child: const Text('Lihat Hasil'),
-        ),
-      );
+      submitExam(autoSubmit: false, forced: true);
     }
   }
 
@@ -125,6 +110,7 @@ class StudentExamController extends GetxController {
       textConfirm: 'Ya, Submit',
       textCancel: 'Batal',
       confirmTextColor: Colors.white,
+      buttonColor: AppColors.primaryPurple,
       onConfirm: () {
         Get.back();
         submitExam();
@@ -132,11 +118,56 @@ class StudentExamController extends GetxController {
     );
   }
 
-  void submitExam({bool autoSubmit = false}) {
+  Future<void> submitExam({bool autoSubmit = false, bool forced = false}) async {
+    if (isSubmitting.value) return;
     _timer?.cancel();
-    if (autoSubmit) {
-      Get.snackbar('Waktu Habis', 'Ujian otomatis disubmit.', snackPosition: SnackPosition.TOP);
+    isSubmitting.value = true;
+
+    try {
+      if (quiz.value == null) {
+        Get.offAllNamed(Routes.STUDENT_RESULT);
+        return;
+      }
+
+      // Format answers to match backend expectations: [{ soalId, jawabanSiswa }]
+      final List<Map<String, dynamic>> payload = [];
+      for (int i = 0; i < quiz.value!.soal.length; i++) {
+        payload.add({
+          'soalId': quiz.value!.soal[i].id,
+          'jawabanSiswa': selectedAnswers[i],
+        });
+      }
+
+      final totalTime = quiz.value!.durasi * 60;
+      final timeSpent = totalTime - timeRemaining.value;
+
+      final resultData = await _quizService.submitQuiz(
+        quiz.value!.id,
+        jawaban: payload,
+        durasiPengerjaan: timeSpent,
+      );
+
+      if (autoSubmit) {
+        Get.snackbar('Waktu Habis', 'Ujian otomatis disubmit.', snackPosition: SnackPosition.TOP);
+      } else if (forced) {
+        Get.snackbar('Pelanggaran Maksimal', 'Ujian ditutup otomatis akibat pelanggaran.', snackPosition: SnackPosition.TOP);
+      }
+
+      // Pass grading result details to StudentResultView!
+      Get.offAllNamed(
+        Routes.STUDENT_RESULT,
+        arguments: {
+          'quizTitle': quiz.value!.judul,
+          'nilai': resultData['nilai'] ?? 0,
+          'benar': resultData['benar'] ?? 0,
+          'salah': resultData['salah'] ?? 0,
+        },
+      );
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal mengumpulkan jawaban: $e', snackPosition: SnackPosition.BOTTOM);
+      Get.offAllNamed(Routes.STUDENT_MAIN);
+    } finally {
+      isSubmitting.value = false;
     }
-    Get.offAllNamed(Routes.STUDENT_RESULT);
   }
 }

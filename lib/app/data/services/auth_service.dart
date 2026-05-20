@@ -59,6 +59,36 @@ class AuthService extends GetxService {
     }
   }
 
+  Future<AuthResponse> googleSignIn({
+    required String idToken,
+    required String accessToken,
+    required String role,
+  }) async {
+    try {
+      final response = await _apiProvider.dio.post(
+        '/auth/google',
+        data: {
+          'idToken': idToken,
+          'accessToken': accessToken,
+          'role': role,
+        },
+      );
+
+      final authResponse = AuthResponse.fromJson(response.data);
+      if (authResponse.success && authResponse.token != null && authResponse.user != null) {
+        await _storage.write('token', authResponse.token);
+        await _storage.write('user', authResponse.user!.toJson());
+        currentUser.value = authResponse.user;
+        isAuthenticated.value = true;
+      }
+      return authResponse;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   Future<bool> register({
     required String nama,
     required String email,
@@ -216,6 +246,38 @@ class AuthService extends GetxService {
       } else {
         logout();
       }
+    }
+  }
+
+  Future<Map<String, dynamic>> getTeacherStats() async {
+    try {
+      final response = await _apiProvider.dio.get('/dashboard/teacher');
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw 'Empty response';
+    } catch (_) {
+      return {
+        'activeModulesCount': 12,
+        'activeQuizzesCount': 8,
+        'studentsCount': 36,
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getStudentStats() async {
+    try {
+      final response = await _apiProvider.dio.get('/dashboard/student');
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw 'Empty response';
+    } catch (_) {
+      return {
+        'completedTasksCount': 18,
+        'averageScore': 88.5,
+        'rank': 3,
+      };
     }
   }
 

@@ -24,12 +24,12 @@ class StudentExamView extends GetView<StudentExamController> {
                 children: [
                   const Icon(Icons.description_outlined, color: AppColors.darkPurple),
                   const Gap(8),
-                  const Expanded(
-                    child: Text(
-                      'UAS - Basis Data',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPurple),
+                  Expanded(
+                    child: Obx(() => Text(
+                      controller.quiz.value?.judul ?? 'Ujian',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPurple),
                       overflow: TextOverflow.ellipsis,
-                    ),
+                    )),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -85,18 +85,24 @@ class StudentExamView extends GetView<StudentExamController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Obx(() => Text(
-                          'Soal ${controller.currentQuestionIndex.value + 1} dari ${controller.questions.length}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        )),
+                        Obx(() {
+                          final total = controller.quiz.value?.soal.length ?? 0;
+                          return Text(
+                            'Soal ${controller.currentQuestionIndex.value + 1} dari $total',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          );
+                        }),
                         const Gap(8),
-                        Obx(() => LinearProgressIndicator(
-                          value: (controller.currentQuestionIndex.value + 1) / controller.questions.length,
-                          backgroundColor: AppColors.grey200,
-                          valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
-                          minHeight: 8,
-                          borderRadius: BorderRadius.circular(4),
-                        )),
+                        Obx(() {
+                          final total = controller.quiz.value?.soal.length ?? 1;
+                          return LinearProgressIndicator(
+                            value: (controller.currentQuestionIndex.value + 1) / total,
+                            backgroundColor: AppColors.grey200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(4),
+                          );
+                        }),
                         const Gap(12),
                         Obx(() {
                           if (controller.warningCount.value > 0) {
@@ -126,20 +132,26 @@ class StudentExamView extends GetView<StudentExamController> {
             // Question Area
             Expanded(
               child: Obx(() {
-                final currentQ = controller.questions[controller.currentQuestionIndex.value];
+                final quizObj = controller.quiz.value;
+                if (quizObj == null || quizObj.soal.isEmpty) {
+                  return const Center(
+                    child: Text('Tidak ada soal untuk ditampilkan.'),
+                  );
+                }
+                final currentQ = quizObj.soal[controller.currentQuestionIndex.value];
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        currentQ['question'],
+                        currentQ.pertanyaan,
                         style: const TextStyle(fontSize: 16, height: 1.5, color: AppColors.darkPurple),
                       ),
                       const Gap(24),
-                      ...List.generate(currentQ['options'].length, (index) {
+                      ...List.generate(currentQ.pilihan.length, (index) {
                         return Obx(() {
-                          final isSelected = currentQ['selected'].value == index;
+                          final isSelected = controller.selectedAnswers[controller.currentQuestionIndex.value] == index;
                           return GestureDetector(
                             onTap: () => controller.selectOption(index),
                             child: Container(
@@ -180,7 +192,7 @@ class StudentExamView extends GetView<StudentExamController> {
                                   const Gap(12),
                                   Expanded(
                                     child: Text(
-                                      currentQ['options'][index],
+                                      currentQ.pilihan[index],
                                       style: TextStyle(
                                         color: isSelected ? AppColors.darkPurple : AppColors.grey800,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -219,7 +231,8 @@ class StudentExamView extends GetView<StudentExamController> {
                     child: const Text('Sebelumnya'),
                   )),
                   Obx(() {
-                    if (controller.currentQuestionIndex.value < controller.questions.length - 1) {
+                    final total = controller.quiz.value?.soal.length ?? 0;
+                    if (controller.currentQuestionIndex.value < total - 1) {
                       return ElevatedButton(
                         onPressed: controller.nextQuestion,
                         style: ElevatedButton.styleFrom(

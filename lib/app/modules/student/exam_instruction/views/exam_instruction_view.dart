@@ -32,19 +32,30 @@ class ExamInstructionView extends GetView<ExamInstructionController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Ujian Akhir Semester - Basis Data', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkPurple)),
-                  const Gap(10),
-                  Row(
-                    children: [
-                      Icon(Icons.timer_outlined, size: 18, color: AppColors.grey600),
-                      const Gap(8),
-                      const Text('Waktu: 60 Menit', style: TextStyle(color: AppColors.grey600)),
-                      const Gap(20),
-                      Icon(Icons.assignment_outlined, size: 18, color: AppColors.grey600),
-                      const Gap(8),
-                      const Text('Soal: 20 Pilihan Ganda', style: TextStyle(color: AppColors.grey600)),
-                    ],
-                  ),
+                  Obx(() {
+                    final q = controller.quiz.value;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          q?.judul ?? 'Memuat Detail Ujian...',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkPurple),
+                        ),
+                        const Gap(10),
+                        Row(
+                          children: [
+                            const Icon(Icons.timer_outlined, size: 18, color: AppColors.grey600),
+                            const Gap(8),
+                            Text('Waktu: ${q?.durasi ?? 30} Menit', style: const TextStyle(color: AppColors.grey600)),
+                            const Gap(20),
+                            const Icon(Icons.assignment_outlined, size: 18, color: AppColors.grey600),
+                            const Gap(8),
+                            Text('Soal: ${q?.soal.length ?? 0} Pilihan Ganda', style: const TextStyle(color: AppColors.grey600)),
+                          ],
+                        ),
+                      ],
+                    );
+                  }),
                   const Gap(20),
                   const Divider(),
                   const Gap(10),

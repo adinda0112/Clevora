@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:gap/gap.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/teacher/ai_generate/controllers/ai_result_controller.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class AiResultView extends GetView<AiResultController> {
   const AiResultView({super.key});
@@ -52,13 +53,7 @@ class AiResultView extends GetView<AiResultController> {
                   BoxShadow(color: AppColors.grey200.withOpacity(0.5), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
-              child: Obx(() {
-                if (controller.generateType.value == 'Quiz') {
-                  return _buildQuizResult();
-                } else {
-                  return _buildMateriResult();
-                }
-              }),
+              child: Obx(() => _buildMateriResult()),
             ),
           ],
         ),
@@ -73,26 +68,36 @@ class AiResultView extends GetView<AiResultController> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.back();
+                },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primaryPurple,
                   side: const BorderSide(color: AppColors.primaryPurple),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Edit / Export'),
+                child: const Text('Batal'),
               ),
             ),
             const Gap(16),
             Expanded(
-              child: ElevatedButton(
-                onPressed: controller.saveAndPublish,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: controller.isSaving.value ? null : controller.saveAndPublish,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryPurple,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: controller.isSaving.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('Simpan & Publish', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-                child: const Text('Simpan & Publish', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -101,62 +106,43 @@ class AiResultView extends GetView<AiResultController> {
     );
   }
 
-  Widget _buildQuizResult() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Quiz: ${controller.topik.value}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkPurple)),
-        const Gap(16),
-        _buildQuizItem(1, 'Apa definisi paling tepat untuk topik ini?', ['Pilihan A (Benar)', 'Pilihan B', 'Pilihan C', 'Pilihan D'], 0),
-        const Divider(height: 30),
-        _buildQuizItem(2, 'Manakah yang bukan termasuk karakteristik utama?', ['Karakteristik 1', 'Karakteristik 2', 'Karakteristik 3 (Benar)', 'Karakteristik 4'], 2),
-      ],
-    );
-  }
-
-  Widget _buildQuizItem(int number, String question, List<String> options, int correctAnswerIndex) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('$number. $question', style: const TextStyle(fontWeight: FontWeight.w600)),
-        const Gap(8),
-        ...List.generate(options.length, (index) {
-          final isCorrect = index == correctAnswerIndex;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Icon(isCorrect ? Icons.check_circle : Icons.radio_button_unchecked, 
-                     color: isCorrect ? Colors.green : AppColors.grey400, size: 18),
-                const Gap(8),
-                Text(options[index], style: TextStyle(color: isCorrect ? Colors.green[800] : AppColors.grey700)),
-              ],
-            ),
-          );
-        }),
-        const Gap(8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.grey100, borderRadius: BorderRadius.circular(4)),
-          child: const Text('Difficulty: Sedang', style: TextStyle(fontSize: 11, color: AppColors.grey600)),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMateriResult() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(controller.topik.value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.darkPurple)),
-        const Gap(8),
-        const Text('Tujuan Pembelajaran:', style: TextStyle(fontWeight: FontWeight.w600)),
-        const Gap(4),
-        const Text('1. Siswa mampu memahami konsep dasar.\n2. Siswa mampu menerapkan prinsip dalam studi kasus.\n3. Siswa dapat menganalisis masalah terkait.', style: TextStyle(color: AppColors.grey800, height: 1.5)),
+        Row(
+          children: [
+            const Icon(Icons.description, color: AppColors.primaryPurple, size: 20),
+            const Gap(8),
+            Expanded(
+              child: Text(
+                '${controller.generateType.value}: ${controller.topik.value}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkPurple,
+                ),
+              ),
+            ),
+          ],
+        ),
         const Gap(16),
-        const Text('Ringkasan Materi:', style: TextStyle(fontWeight: FontWeight.w600)),
-        const Gap(4),
-        const Text('Topik ini mencakup penjelasan mendalam mengenai prinsip kerja, kelebihan, dan implementasi nyata di lapangan. Modul ini disusun berdasarkan kurikulum terbaru dengan pendekatan student-centered learning yang interaktif.', style: TextStyle(color: AppColors.grey800, height: 1.5)),
+        const Divider(),
+        const Gap(16),
+        SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: MarkdownBody(
+            data: controller.resultText.value,
+            styleSheet: MarkdownStyleSheet(
+              p: const TextStyle(fontSize: 14, height: 1.6, color: AppColors.grey800),
+              h1: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkPurple),
+              h2: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryPurple),
+              h3: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.darkPurple),
+              listBullet: const TextStyle(fontSize: 14, color: AppColors.grey800),
+            ),
+          ),
+        ),
       ],
     );
   }

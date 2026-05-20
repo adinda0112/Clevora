@@ -67,11 +67,19 @@ class GenerateFormView extends GetView<GenerateFormController> {
             _buildLabel('Tingkat Kesulitan'),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.tingkatKesulitan.value,
-                decoration: _inputDecoration(),
-                items: ['Mudah', 'Sedang', 'Sulit', 'HOTS'].map((String val) {
-                  return DropdownMenuItem(value: val, child: Text(val));
-                }).toList(),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+                initialValue: controller.tingkatKesulitan.value,
+                items: ['Mudah', 'Sedang', 'Sulit', 'HOTS']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
                 onChanged: (val) {
                   if (val != null) controller.tingkatKesulitan.value = val;
                 },

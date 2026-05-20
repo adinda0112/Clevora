@@ -33,7 +33,9 @@ import 'package:clevora/app/modules/student/student_main/bindings/student_main_b
 import 'package:clevora/app/modules/student/student_main/views/student_main_view.dart';
 import 'package:clevora/app/modules/student/dashboard/bindings/student_home_binding.dart';
 import 'package:clevora/app/modules/student/dashboard/views/student_home_view.dart';
+import 'package:clevora/app/modules/student/learning/bindings/learning_binding.dart';
 import 'package:clevora/app/modules/student/learning/views/learning_view.dart';
+import 'package:clevora/app/modules/student/student_quiz/bindings/student_quiz_binding.dart';
 import 'package:clevora/app/modules/student/student_quiz/views/student_quiz_view.dart';
 import 'package:clevora/app/modules/student/exam_instruction/bindings/exam_instruction_binding.dart';
 import 'package:clevora/app/modules/student/exam_instruction/views/exam_instruction_view.dart';
@@ -73,8 +75,8 @@ class AppPages {
     // Student
     GetPage(name: Routes.STUDENT_MAIN, page: () => const StudentMainView(), binding: StudentMainBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.STUDENT_HOME, page: () => const StudentHomeView(), binding: StudentHomeBinding(), transition: Transition.fadeIn),
-    GetPage(name: Routes.LEARNING, page: () => const LearningView(), transition: Transition.rightToLeft),
-    GetPage(name: Routes.STUDENT_QUIZ, page: () => const StudentQuizView(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.LEARNING, page: () => const LearningView(), binding: LearningBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.STUDENT_QUIZ, page: () => const StudentQuizView(), binding: StudentQuizBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.EXAM_INSTRUCTION, page: () => const ExamInstructionView(), binding: ExamInstructionBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.STUDENT_EXAM, page: () => const StudentExamView(), binding: StudentExamBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.STUDENT_RESULT, page: () => const StudentResultView(), binding: StudentResultBinding(), transition: Transition.rightToLeft),

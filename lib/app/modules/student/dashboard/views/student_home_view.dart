@@ -6,6 +6,7 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/widgets/menu_card.dart';
 import 'package:clevora/app/widgets/stat_card.dart';
 import 'package:clevora/app/modules/student/dashboard/controllers/student_home_controller.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 class StudentHomeView extends GetView<StudentHomeController> {
   const StudentHomeView({super.key});
@@ -138,9 +139,18 @@ class StudentHomeView extends GetView<StudentHomeController> {
                           backgroundColor: item['bg'],
                           textColor: item['text'],
                           onTap: () {
-                            Get.snackbar('Informasi', 'Menu ${item['title']} ditekan',
+                            if (index == 0) {
+                              Get.toNamed(Routes.LEARNING);
+                            } else if (index == 1 || index == 2 || index == 3) {
+                              Get.toNamed(Routes.STUDENT_QUIZ);
+                            } else {
+                              Get.snackbar(
+                                'Informasi',
+                                'Menu ${item['title']} akan segera hadir!',
                                 snackPosition: SnackPosition.BOTTOM,
-                                margin: const EdgeInsets.all(10));
+                                margin: const EdgeInsets.all(10),
+                              );
+                            }
                           },
                         );
                       },

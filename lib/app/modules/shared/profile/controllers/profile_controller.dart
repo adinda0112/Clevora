@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:clevora/app/data/models/user_model.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 
 class ProfileController extends GetxController {
@@ -15,6 +16,8 @@ class ProfileController extends GetxController {
     {'title': 'Privacy & security', 'icon': Icons.lock_outline},
     {'title': 'Help center', 'icon': Icons.help_outline},
   ].obs;
+
+  Rxn<UserModel> get currentUser => _authService.currentUser;
 
   @override
   void onInit() {

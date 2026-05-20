@@ -44,7 +44,10 @@ class StudentResultView extends GetView<StudentResultController> {
                     child: const Icon(Icons.emoji_events, size: 48, color: AppColors.primaryPurple),
                   ),
                   const Gap(24),
-                  const Text('UAS - Basis Data', style: TextStyle(fontSize: 16, color: AppColors.grey600)),
+                  Obx(() => Text(
+                    controller.quizTitle.value,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.grey600),
+                  )),
                   const Gap(8),
                   const Text('Nilai Akhir', style: TextStyle(fontSize: 14, color: AppColors.grey500)),
                   const Gap(4),
@@ -55,14 +58,14 @@ class StudentResultView extends GetView<StudentResultController> {
                   const Gap(24),
                   const Divider(),
                   const Gap(24),
-                  Row(
+                  Obx(() => Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatItem('Benar', controller.correctAnswers.value.toString(), Colors.green),
                       _buildStatItem('Salah', controller.wrongAnswers.value.toString(), Colors.red),
                       _buildStatItem('Total', controller.totalQuestions.value.toString(), AppColors.darkPurple),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ),

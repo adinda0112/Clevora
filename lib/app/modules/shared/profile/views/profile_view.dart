@@ -90,6 +90,50 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ),
               const Gap(14),
+              Obx(() {
+                final user = controller.currentUser.value;
+                if (user == null) {
+                  return const SizedBox.shrink();
+                }
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 18,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      if (user.role == 'guru') ...[
+                        _buildInfoRow('NIP', user.nip ?? '-'),
+                        const Divider(height: 20),
+                        _buildInfoRow('Mata Pelajaran', user.mapel ?? '-'),
+                        const Divider(height: 20),
+                        _buildInfoRow('Jenjang', user.jenjang ?? '-'),
+                      ] else ...[
+                        _buildInfoRow('NISN', user.nisn ?? '-'),
+                        const Divider(height: 20),
+                        _buildInfoRow('Kelas', user.kelas ?? '-'),
+                        const Divider(height: 20),
+                        _buildInfoRow('Sekolah', user.sekolah ?? '-'),
+                      ],
+                    ],
+                  ),
+                );
+              }),
+              const Gap(24),
+              const Text(
+                'Pengaturan Akun',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+              const Gap(14),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -136,25 +180,52 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ),
               const Gap(24),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                ),
-                onPressed: () => controller.logout(),
-                icon: const Icon(Icons.logout, color: Colors.white),
-                label: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.white),
+                  onPressed: () => controller.logout(),
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  label: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF6B7280),
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Color(0xFF1F2937),
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2,28 +2,64 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 
+import 'package:clevora/app/data/services/auth_service.dart';
+
 class TeacherHomeController extends GetxController {
-  final userName = 'Bpk. Andi Saputra'.obs;
-  final userRole = 'Guru Informatika · SMAN 1 Tegal'.obs;
+  final AuthService _authService = Get.find<AuthService>();
+
+  final userName = ''.obs;
+  final userRole = ''.obs;
   final searchQuery = ''.obs;
 
   final stats = <Map<String, dynamic>>[
     {
       'title': 'Modul Ajar',
-      'value': '12',
+      'value': '0',
       'color': AppColors.primaryPurple,
     },
     {
       'title': 'Kuis Aktif',
-      'value': '34',
+      'value': '0',
       'color': AppColors.teal,
     },
     {
       'title': 'Siswa',
-      'value': '128',
+      'value': '0',
       'color': AppColors.amber,
     },
   ].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _bindUserData();
+    fetchDashboardStats();
+  }
+
+  void _bindUserData() {
+    final user = _authService.currentUser.value;
+    if (user != null) {
+      userName.value = user.nama;
+      userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
+    }
+
+    ever(_authService.currentUser, (user) {
+      if (user != null) {
+        userName.value = user.nama;
+        userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
+      }
+    });
+  }
+
+  Future<void> fetchDashboardStats() async {
+    try {
+      final data = await _authService.getTeacherStats();
+      stats[0]['value'] = (data['activeModulesCount'] ?? 0).toString();
+      stats[1]['value'] = (data['activeQuizzesCount'] ?? 0).toString();
+      stats[2]['value'] = (data['studentsCount'] ?? 0).toString();
+      stats.refresh();
+    } catch (_) {}
+  }
 
   final menuItems = <Map<String, dynamic>>[
     {
