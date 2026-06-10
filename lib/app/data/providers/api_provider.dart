@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 
 class ApiProvider {
   late Dio _dio;
-  final String baseUrl = 'https://api.clevora.id/api';
+  final String baseUrl = 'https://trapdoor-idealism-bath.ngrok-free.dev/api';
 
   ApiProvider() {
     _dio = Dio(
