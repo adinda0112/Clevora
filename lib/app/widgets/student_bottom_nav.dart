@@ -20,7 +20,6 @@ class StudentBottomNav extends StatelessWidget {
         NavItem(icon: Icons.home_filled, label: 'Dashboard'),
         NavItem(icon: Icons.menu_book_outlined, label: 'Belajar'),
         NavItem(icon: Icons.assignment_turned_in_outlined, label: 'Quiz'),
-        NavItem(icon: Icons.emoji_events_outlined, label: 'Hasil'),
         NavItem(icon: Icons.person_outline, label: 'Profile'),
       ],
     );

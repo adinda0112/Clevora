@@ -2,6 +2,7 @@ abstract class Routes {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const COMPLETE_PROFILE = '/complete-profile';
   static const OTP = '/otp';
   
   static const TEACHER_MAIN = '/teacher-main';
@@ -10,6 +11,7 @@ abstract class Routes {
   static const REPORT = '/report';
   static const PROFILE = '/profile';
   static const EDIT_PROFILE = '/edit-profile';
+  static const ATTENDANCE = '/attendance';
   
   static const MODULE_AI = '/module-ai';
   static const GENERATE_FORM = '/generate-form';

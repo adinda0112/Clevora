@@ -7,8 +7,8 @@ class GenerateFormController extends GetxController {
   final mataPelajaran = ''.obs;
   final kelas = 'X'.obs;
   final topik = ''.obs;
-  final tingkatKesulitan = 'Sedang'.obs;
   final jumlahSoal = '10'.obs;
+  final quizType = 'Ujian'.obs;
 
   @override
   void onInit() {
@@ -20,9 +20,7 @@ class GenerateFormController extends GetxController {
   }
 
   void startGenerate() {
-    final additional = 'Tingkat Kesulitan: ${tingkatKesulitan.value}' + 
-        (generateType.value == 'Quiz' ? ', Jumlah Soal: ${jumlahSoal.value}' : '');
-        
+    final additional = generateType.value == 'Quiz' ? 'Tipe Kuis: ${quizType.value}, Jumlah Soal: ${jumlahSoal.value}' : '';
     Get.toNamed(Routes.GENERATING_STATE, arguments: {
       'type': generateType.value,
       'topik': topik.value.isEmpty ? 'Topik Umum' : topik.value,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 class ParsedQuestion {
   final String questionText;
@@ -28,6 +29,11 @@ class AiResultController extends GetxController {
   final mapel = ''.obs;
 
   final isSaving = false.obs;
+  final isEditing = false.obs;
+  final hasSaved = false.obs;
+  final hasDownloaded = false.obs;
+  final textEditController = TextEditingController();
+  bool _isDisposed = false;
 
   @override
   void onInit() {
@@ -39,7 +45,15 @@ class AiResultController extends GetxController {
       resultText.value = args['result'] ?? 'Tidak ada konten hasil generate.';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
+      textEditController.text = resultText.value;
     }
+  }
+
+  @override
+  void onClose() {
+    _isDisposed = true;
+    textEditController.dispose();
+    super.onClose();
   }
 
   List<ParsedQuestion> _parseQuizMarkdown(String text) {
@@ -170,7 +184,31 @@ class AiResultController extends GetxController {
     return questions;
   }
 
-  Future<void> saveAndPublish() async {
+  void toggleEdit() {
+    if (isEditing.value) {
+      // Save changes
+      resultText.value = textEditController.text;
+    }
+    isEditing.toggle();
+  }
+
+  void downloadPdf() {
+    // Mock download PDF
+    hasDownloaded.value = true;
+    Get.snackbar(
+      'Berhasil',
+      'Dokumen berhasil diunduh sebagai PDF.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFFEAF3DE),
+      colorText: const Color(0xFF3B6D11),
+    );
+  }
+
+  void finishProcess() {
+    Get.until((route) => Get.currentRoute == Routes.MODULE_AI || Get.currentRoute == Routes.TEACHER_HOME);
+  }
+
+  Future<void> saveAndPublish({String? shareClass}) async {
     isSaving.value = true;
     try {
       if (generateType.value == 'Modul' || generateType.value == 'Materi' || generateType.value == 'ATP') {
@@ -209,16 +247,14 @@ class AiResultController extends GetxController {
 
       Get.snackbar(
         'Berhasil',
-        '${generateType.value} berhasil disimpan dan dipublish ke siswa!',
+        '${generateType.value} berhasil disimpan' + (shareClass != null ? ' dan dishare ke kelas $shareClass!' : '!'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFEAF3DE),
         colorText: const Color(0xFF3B6D11),
         margin: const EdgeInsets.all(16),
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.back();
-      });
+      hasSaved.value = true;
     } catch (e) {
       Get.snackbar(
         'Gagal',

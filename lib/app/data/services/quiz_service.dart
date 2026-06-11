@@ -89,6 +89,19 @@ class QuizService extends GetxService {
     }
   }
 
+  // Start / resume quiz (Siswa)
+  Future<Map<String, dynamic>> startQuiz(String quizId) async {
+    try {
+      final response = await _apiProvider.dio.post('/kuis/$quizId/start');
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw 'Gagal memulai kuis';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Submit quiz / grading (Siswa)
   Future<Map<String, dynamic>> submitQuiz(
     String quizId, {

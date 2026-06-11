@@ -7,6 +7,7 @@ class StudentQuizController extends GetxController {
 
   final quizzes = <QuizModel>[].obs;
   final isLoading = false.obs;
+  final completedQuizIds = <String>{}.obs;
 
   @override
   void onInit() {
@@ -19,6 +20,10 @@ class StudentQuizController extends GetxController {
     try {
       final fetched = await _quizService.getQuizzes();
       quizzes.assignAll(fetched);
+      if (fetched.isNotEmpty) {
+        // Mocking the first quiz as completed for demonstration
+        completedQuizIds.add(fetched.first.id);
+      }
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -28,5 +33,9 @@ class StudentQuizController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  bool isCompleted(String quizId) {
+    return completedQuizIds.contains(quizId);
   }
 }

@@ -19,10 +19,10 @@ class SplashController extends GetxController {
   }
 
   void goToLogin() {
-    Get.toNamed(Routes.LOGIN);
+    Get.offAllNamed(Routes.LOGIN);
   }
 
   void goToRegister() {
-    Get.toNamed(Routes.REGISTER);
+    Get.offAllNamed(Routes.REGISTER);
   }
 }

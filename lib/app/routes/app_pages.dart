@@ -10,6 +10,8 @@ import 'package:clevora/app/modules/auth/register/bindings/register_binding.dart
 import 'package:clevora/app/modules/auth/register/views/register_view.dart';
 import 'package:clevora/app/modules/auth/otp/bindings/otp_binding.dart';
 import 'package:clevora/app/modules/auth/otp/views/otp_view.dart';
+import 'package:clevora/app/modules/auth/complete_profile/bindings/complete_profile_binding.dart';
+import 'package:clevora/app/modules/auth/complete_profile/views/complete_profile_view.dart';
 
 // Teacher
 import 'package:clevora/app/modules/teacher/teacher_main/bindings/teacher_main_binding.dart';
@@ -18,6 +20,7 @@ import 'package:clevora/app/modules/teacher/dashboard/bindings/teacher_home_bind
 import 'package:clevora/app/modules/teacher/dashboard/views/teacher_home_view.dart';
 import 'package:clevora/app/modules/teacher/quiz_management/views/quiz_management_view.dart';
 import 'package:clevora/app/modules/teacher/report/views/report_view.dart';
+import 'package:clevora/app/modules/teacher/attendance/views/attendance_view.dart';
 
 // Teacher AI Generate
 import 'package:clevora/app/modules/teacher/ai_generate/views/module_ai_view.dart';
@@ -58,6 +61,7 @@ class AppPages {
     GetPage(name: Routes.SPLASH, page: () => const SplashView(), binding: SplashBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.LOGIN, page: () => const LoginView(), binding: LoginBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.REGISTER, page: () => const RegisterView(), binding: RegisterBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.COMPLETE_PROFILE, page: () => const CompleteProfileView(), binding: CompleteProfileBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.OTP, page: () => const OtpView(), binding: OtpBinding(), transition: Transition.rightToLeft),
     
     // Teacher
@@ -65,6 +69,7 @@ class AppPages {
     GetPage(name: Routes.TEACHER_HOME, page: () => const TeacherHomeView(), binding: TeacherHomeBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.QUIZ_MANAGEMENT, page: () => const QuizManagementView(), transition: Transition.rightToLeft),
     GetPage(name: Routes.REPORT, page: () => const ReportView(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.ATTENDANCE, page: () => const AttendanceView(), transition: Transition.rightToLeft),
     
     // Teacher AI Generate
     GetPage(name: Routes.MODULE_AI, page: () => const ModuleAiView(), transition: Transition.rightToLeft),

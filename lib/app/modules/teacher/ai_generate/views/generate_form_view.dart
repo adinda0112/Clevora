@@ -64,34 +64,51 @@ class GenerateFormView extends GetView<GenerateFormController> {
             ),
             const Gap(16),
 
-            _buildLabel('Tingkat Kesulitan'),
-            Obx(
-              () => DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLabel('Upload Template (Opsional)'),
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.grey200),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Get.snackbar('Upload', 'Fitur upload file sedang dalam pengembangan');
+                    },
+                    icon: const Icon(Icons.upload_file, color: AppColors.primaryPurple),
+                    label: const Text(
+                      'Pilih File PDF/DOCX',
+                      style: TextStyle(color: AppColors.grey600),
+                    ),
+                  ),
                 ),
-                initialValue: controller.tingkatKesulitan.value,
-                items: ['Mudah', 'Sedang', 'Sulit', 'HOTS']
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) controller.tingkatKesulitan.value = val;
-                },
-              ),
+                const Gap(16),
+              ],
             ),
-            const Gap(16),
 
             Obx(() {
               if (controller.generateType.value == 'Quiz') {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _buildLabel('Tipe Kuis'),
+                    DropdownButtonFormField<String>(
+                      value: controller.quizType.value,
+                      decoration: _inputDecoration(),
+                      items: ['Pretest', 'Posttest', 'Ujian'].map((String val) {
+                        return DropdownMenuItem(value: val, child: Text(val));
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) controller.quizType.value = val;
+                      },
+                    ),
+                    const Gap(16),
+
                     _buildLabel('Jumlah Soal'),
                     DropdownButtonFormField<String>(
                       value: controller.jumlahSoal.value,

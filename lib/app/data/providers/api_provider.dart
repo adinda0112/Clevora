@@ -35,8 +35,10 @@ class ApiProvider {
           if (e.response?.statusCode == 401) {
             _storage.remove('token');
             _storage.remove('user');
-            // Safely redirect to Login view
-            getx.Get.offAllNamed(Routes.LOGIN);
+            // Safely redirect to Login view only if not already on Login view
+            if (getx.Get.currentRoute != Routes.LOGIN) {
+              getx.Get.offAllNamed(Routes.LOGIN);
+            }
           }
           return handler.next(e);
         },

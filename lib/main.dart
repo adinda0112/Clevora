@@ -8,6 +8,7 @@ import 'app/theme/app_theme.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
+import 'package:clevora/app/data/services/face_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,7 @@ void main() async {
   Get.put(AuthService(), permanent: true);
   Get.lazyPut(() => ModuleService(), fenix: true);
   Get.lazyPut(() => QuizService(), fenix: true);
+  Get.lazyPut(() => FaceService(), fenix: true);
   runApp(const ClevoraApp());
 }
 

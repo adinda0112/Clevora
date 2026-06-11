@@ -17,13 +17,15 @@ class ProfileController extends GetxController {
     {'title': 'Help center', 'icon': Icons.help_outline},
   ].obs;
 
+  late final Worker _userWorker;
+
   Rxn<UserModel> get currentUser => _authService.currentUser;
 
   @override
   void onInit() {
     super.onInit();
     // Synchronize details with the global auth session changes
-    ever(_authService.currentUser, (user) {
+    _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         fullName.value = user.nama;
         role.value = user.role == 'guru' ? 'Guru' : 'Siswa';
@@ -38,6 +40,12 @@ class ProfileController extends GetxController {
       role.value = user.role == 'guru' ? 'Guru' : 'Siswa';
       email.value = user.email;
     }
+  }
+
+  @override
+  void onClose() {
+    _userWorker.dispose();
+    super.onClose();
   }
 
   void logout() {

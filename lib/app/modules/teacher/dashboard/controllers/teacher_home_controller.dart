@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/theme/app_theme.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 import 'package:clevora/app/data/services/auth_service.dart';
 
@@ -13,27 +14,44 @@ class TeacherHomeController extends GetxController {
 
   final stats = <Map<String, dynamic>>[
     {
-      'title': 'Modul Ajar',
+      'title': 'ATP',
       'value': '0',
       'color': AppColors.primaryPurple,
+      'route': Routes.MODULE_AI, // Assuming history is in module ai or specific route
     },
     {
-      'title': 'Kuis Aktif',
+      'title': 'Modul Ajar',
       'value': '0',
       'color': AppColors.teal,
+      'route': Routes.MODULE_AI,
     },
     {
-      'title': 'Siswa',
+      'title': 'Materi',
       'value': '0',
       'color': AppColors.amber,
+      'route': Routes.MODULE_AI, // TODO: route to materi history
+    },
+    {
+      'title': 'Kuis',
+      'value': '0',
+      'color': AppColors.red,
+      'route': Routes.QUIZ_MANAGEMENT,
     },
   ].obs;
+
+  late final Worker _userWorker;
 
   @override
   void onInit() {
     super.onInit();
     _bindUserData();
     fetchDashboardStats();
+  }
+
+  @override
+  void onClose() {
+    _userWorker.dispose();
+    super.onClose();
   }
 
   void _bindUserData() {
@@ -43,7 +61,7 @@ class TeacherHomeController extends GetxController {
       userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
     }
 
-    ever(_authService.currentUser, (user) {
+    _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         userName.value = user.nama;
         userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
@@ -54,34 +72,22 @@ class TeacherHomeController extends GetxController {
   Future<void> fetchDashboardStats() async {
     try {
       final data = await _authService.getTeacherStats();
-      stats[0]['value'] = (data['activeModulesCount'] ?? 0).toString();
-      stats[1]['value'] = (data['activeQuizzesCount'] ?? 0).toString();
-      stats[2]['value'] = (data['studentsCount'] ?? 0).toString();
+      stats[0]['value'] = (data['atpCount'] ?? 0).toString();
+      stats[1]['value'] = (data['modulCount'] ?? 0).toString();
+      stats[2]['value'] = (data['materiCount'] ?? 0).toString();
+      stats[3]['value'] = (data['kuisCount'] ?? 0).toString();
       stats.refresh();
     } catch (_) {}
   }
 
   final menuItems = <Map<String, dynamic>>[
     {
-      'title': 'ATP & Modul Ajar',
-      'subtitle': 'Generate otomatis',
-      'icon': Icons.description_outlined,
+      'title': 'Absen Siswa',
+      'subtitle': 'Kehadiran harian',
+      'icon': Icons.co_present_outlined,
       'bg': AppColors.lightPurple,
       'text': AppColors.darkPurple,
-    },
-    {
-      'title': 'Bank Materi',
-      'subtitle': 'Konten pembelajaran',
-      'icon': Icons.auto_stories_outlined,
-      'bg': AppColors.lightTeal,
-      'text': const Color(0xFF085041),
-    },
-    {
-      'title': 'Kelola Kuis',
-      'subtitle': 'Pretest · Postest · Ujian',
-      'icon': Icons.assignment_turned_in_outlined,
-      'bg': AppColors.lightAmber,
-      'text': const Color(0xFF633806),
+      'route': Routes.ATTENDANCE ?? '/attendance', // Assume new route
     },
     {
       'title': 'Laporan Nilai',
@@ -89,6 +95,7 @@ class TeacherHomeController extends GetxController {
       'icon': Icons.bar_chart_outlined,
       'bg': AppColors.lightCoral,
       'text': const Color(0xFF711b13),
+      'route': Routes.REPORT,
     },
   ].obs;
 

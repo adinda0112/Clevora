@@ -11,6 +11,8 @@ class LoginController extends GetxController {
   final isLoading = false.obs;
   final rememberMe = false.obs;
   
+  final formKey = GlobalKey<FormState>();
+  
   // Google Sign-In instance
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     // clientId untuk Android menggunakan OAuth Client ID Android
@@ -46,39 +48,6 @@ class LoginController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    if (email.isEmpty) {
-      Get.snackbar(
-        "Peringatan",
-        "Email tidak boleh kosong",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (!EmailValidator.validate(email)) {
-      Get.snackbar(
-        "Peringatan",
-        "Format email tidak valid",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (password.isEmpty) {
-      Get.snackbar(
-        "Peringatan",
-        "Password tidak boleh kosong",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
     try {
       isLoading.value = true;
 
@@ -87,6 +56,10 @@ class LoginController extends GetxController {
         password: password,
         role: selectedRole.value,
       );
+
+      if (!result.success) {
+        throw Exception(result.message);
+      }
 
       Get.snackbar(
         "Berhasil",
@@ -104,9 +77,10 @@ class LoginController extends GetxController {
         Get.offAllNamed(Routes.STUDENT_MAIN);
       }
     } catch (e) {
+      final msg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception:', '');
       Get.snackbar(
         "Login Gagal",
-        e.toString(),
+        msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade900,
@@ -149,6 +123,10 @@ class LoginController extends GetxController {
         role: selectedRole.value,
       );
 
+      if (!result.success) {
+        throw Exception(result.message);
+      }
+
       Get.snackbar(
         "Berhasil",
         result.message,
@@ -158,16 +136,32 @@ class LoginController extends GetxController {
       );
 
       // Redirect ke halaman sesuai role
-      final userRole = _authService.currentUser.value?.role ?? selectedRole.value;
-      if (userRole == 'guru') {
-        Get.offAllNamed(Routes.TEACHER_MAIN);
+      final user = _authService.currentUser.value;
+      final userRole = user?.role ?? selectedRole.value;
+
+      bool isIncomplete = false;
+      if (user != null) {
+        if (userRole == 'guru') {
+          isIncomplete = (user.nip == null || user.nip!.isEmpty);
+        } else {
+          isIncomplete = (user.nisn == null || user.nisn!.isEmpty || user.kelas == null || user.kelas!.isEmpty);
+        }
+      }
+
+      if (isIncomplete) {
+        Get.offAllNamed(Routes.COMPLETE_PROFILE);
       } else {
-        Get.offAllNamed(Routes.STUDENT_MAIN);
+        if (userRole == 'guru') {
+          Get.offAllNamed(Routes.TEACHER_MAIN);
+        } else {
+          Get.offAllNamed(Routes.STUDENT_MAIN);
+        }
       }
     } catch (e) {
+      final msg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception:', '');
       Get.snackbar(
         "Login Google Gagal",
-        e.toString(),
+        msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade900,

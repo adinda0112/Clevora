@@ -29,11 +29,19 @@ class StudentHomeController extends GetxController {
     },
   ].obs;
 
+  late final Worker _userWorker;
+
   @override
   void onInit() {
     super.onInit();
     _bindUserData();
     fetchDashboardStats();
+  }
+
+  @override
+  void onClose() {
+    _userWorker.dispose();
+    super.onClose();
   }
 
   void _bindUserData() {
@@ -43,7 +51,7 @@ class StudentHomeController extends GetxController {
       userRole.value = 'Siswa Kelas ${user.kelas ?? "XI"} · ${user.sekolah ?? "Clevora"}';
     }
 
-    ever(_authService.currentUser, (user) {
+    _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         userName.value = user.nama;
         userRole.value = 'Siswa Kelas ${user.kelas ?? "XI"} · ${user.sekolah ?? "Clevora"}';

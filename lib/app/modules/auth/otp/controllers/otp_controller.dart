@@ -12,7 +12,7 @@ class OtpController extends GetxController {
   final canResend = false.obs;
 
   String email = '';
-  late Timer _countdownTimer;
+  Timer? _countdownTimer;
   final AuthService _authService = Get.find<AuthService>();
 
   @override
@@ -23,6 +23,7 @@ class OtpController extends GetxController {
   }
 
   void _startCountdown() {
+    _countdownTimer?.cancel();
     canResend.value = false;
     countdown.value = 300;
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -30,7 +31,7 @@ class OtpController extends GetxController {
         countdown.value--;
       } else {
         canResend.value = true;
-        _countdownTimer.cancel();
+        _countdownTimer?.cancel();
       }
     });
   }
@@ -60,7 +61,7 @@ class OtpController extends GetxController {
 
       if (result.success) {
         isSuccess.value = true;
-        await Future.delayed(const Duration(seconds: 1500 ~/ 1000));
+        await Future.delayed(const Duration(milliseconds: 1500));
         
         final user = _authService.currentUser.value;
         if (user != null) {
@@ -130,7 +131,7 @@ class OtpController extends GetxController {
 
   @override
   void onClose() {
-    _countdownTimer.cancel();
+    _countdownTimer?.cancel();
     super.onClose();
   }
 }

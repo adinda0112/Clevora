@@ -59,14 +59,6 @@ class RegisterView extends GetView<RegisterController> {
                   children: [
                     Row(
                       children: [
-                        if (controller.currentStep.value > 0)
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => controller.prevStep(),
-                              child: const Text('Kembali'),
-                            ),
-                          ),
-                        if (controller.currentStep.value > 0) const Gap(12),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: controller.isLoading.value
@@ -96,7 +88,7 @@ class RegisterView extends GetView<RegisterController> {
                     const Gap(16),
                     Center(
                       child: GestureDetector(
-                        onTap: () => Get.toNamed(Routes.LOGIN),
+                        onTap: () => Get.offNamed(Routes.LOGIN),
                         child: Text(
                           'Sudah punya akun? Login',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -314,207 +306,263 @@ class _Step1DataForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Nama
-        Text('Nama Lengkap', style: Theme.of(context).textTheme.titleMedium),
-        const Gap(8),
-        TextField(
-          controller: controller.namaController,
-          decoration: const InputDecoration(
-            hintText: 'Masukkan nama lengkap',
-            prefixIcon: Icon(Icons.person_outline, color: AppColors.grey400),
-          ),
-        ),
-        const Gap(20),
-
-        // Email
-        Text('Email', style: Theme.of(context).textTheme.titleMedium),
-        const Gap(8),
-        TextField(
-          controller: controller.emailController,
-          decoration: const InputDecoration(
-            hintText: 'email@example.com',
-            prefixIcon: Icon(Icons.mail_outline, color: AppColors.grey400),
-          ),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const Gap(20),
-
-        // NIP (conditional untuk guru) atau NISN, Kelas, Sekolah (conditional untuk siswa)
-        Obx(() {
-          if (controller.selectedRole.value == 'guru') {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('NIP', style: Theme.of(context).textTheme.titleMedium),
-                const Gap(8),
-                TextField(
-                  controller: controller.nipController,
-                  decoration: const InputDecoration(
-                    hintText: 'Nomor Induk Pegawai',
-                    prefixIcon: Icon(
-                      Icons.badge_outlined,
-                      color: AppColors.grey400,
-                    ),
-                  ),
-                ),
-                const Gap(20),
-              ],
-            );
-          } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('NISN', style: Theme.of(context).textTheme.titleMedium),
-                const Gap(8),
-                TextField(
-                  controller: controller.nisnController,
-                  decoration: const InputDecoration(
-                    hintText: 'Nomor Induk Siswa Nasional',
-                    prefixIcon: Icon(
-                      Icons.badge_outlined,
-                      color: AppColors.grey400,
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const Gap(20),
-                Text('Kelas', style: Theme.of(context).textTheme.titleMedium),
-                const Gap(8),
-                TextField(
-                  controller: controller.kelasController,
-                  decoration: const InputDecoration(
-                    hintText: 'Contoh: XI IPA 1',
-                    prefixIcon: Icon(
-                      Icons.class_outlined,
-                      color: AppColors.grey400,
-                    ),
-                  ),
-                ),
-                const Gap(20),
-                Text('Sekolah', style: Theme.of(context).textTheme.titleMedium),
-                const Gap(8),
-                TextField(
-                  controller: controller.sekolahController,
-                  decoration: const InputDecoration(
-                    hintText: 'Nama Sekolah asal',
-                    prefixIcon: Icon(
-                      Icons.school_outlined,
-                      color: AppColors.grey400,
-                    ),
-                  ),
-                ),
-                const Gap(20),
-              ],
-            );
-          }
-        }),
-
-        // Mapel Dropdown
-        Text('Mata Pelajaran', style: Theme.of(context).textTheme.titleMedium),
-        const Gap(8),
-        Obx(
-          () => DropdownButtonFormField<String>(
-            value: controller.selectedMapel.value,
-            items: controller.mapelOptions
-                .map(
-                  (mapel) => DropdownMenuItem(value: mapel, child: Text(mapel)),
-                )
-                .toList(),
-            onChanged: (value) => controller.selectedMapel.value = value ?? '',
+    return Form(
+      key: controller.formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Nama
+          Text('Nama Lengkap', style: Theme.of(context).textTheme.titleMedium),
+          const Gap(8),
+          TextFormField(
+            controller: controller.namaController,
+            validator: (val) => val == null || val.trim().isEmpty ? 'Nama tidak boleh kosong' : null,
             decoration: const InputDecoration(
-              hintText: 'Pilih mata pelajaran',
-              prefixIcon: Icon(Icons.book_outlined, color: AppColors.grey400),
+              hintText: 'Masukkan nama lengkap',
+              prefixIcon: Icon(Icons.person_outline, color: AppColors.grey400),
             ),
           ),
-        ),
-        const Gap(20),
+          const Gap(20),
 
-        // Jenjang Dropdown
-        Text(
-          'Jenjang Pendidikan',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const Gap(8),
-        Obx(
-          () => DropdownButtonFormField<String>(
-            value: controller.selectedJenjang.value,
-            items: controller.jenjangOptions
-                .map(
-                  (jenjang) =>
-                      DropdownMenuItem(value: jenjang, child: Text(jenjang)),
-                )
-                .toList(),
-            onChanged: (value) => controller.selectedJenjang.value = value ?? '',
+          // Email
+          Text('Email', style: Theme.of(context).textTheme.titleMedium),
+          const Gap(8),
+          TextFormField(
+            controller: controller.emailController,
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
+              if (!GetUtils.isEmail(val)) return 'Format email tidak valid';
+              return null;
+            },
             decoration: const InputDecoration(
-              hintText: 'Pilih jenjang',
-              prefixIcon: Icon(Icons.school_outlined, color: AppColors.grey400),
+              hintText: 'email@example.com',
+              prefixIcon: Icon(Icons.mail_outline, color: AppColors.grey400),
             ),
+            keyboardType: TextInputType.emailAddress,
           ),
-        ),
-        const Gap(20),
+          const Gap(20),
 
-        // Password
-        Text('Password', style: Theme.of(context).textTheme.titleMedium),
-        const Gap(8),
-        Obx(
-          () => TextField(
-            controller: controller.passwordController,
-            decoration: InputDecoration(
-              hintText: 'minimal 8 karakter',
-              prefixIcon: const Icon(
-                Icons.lock_outline,
-                color: AppColors.grey400,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  controller.obscurePass.value
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+          // NIP (conditional untuk guru) atau NISN, Kelas, Sekolah (conditional untuk siswa)
+          Obx(() {
+            if (controller.selectedRole.value == 'guru') {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('NIP', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  TextFormField(
+                    controller: controller.nipController,
+                    validator: (val) => val == null || val.trim().isEmpty ? 'NIP wajib diisi' : null,
+                    decoration: const InputDecoration(
+                      hintText: 'Nomor Induk Pegawai',
+                      prefixIcon: Icon(
+                        Icons.badge_outlined,
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                  ),
+                  const Gap(20),
+                ],
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('NISN', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  TextFormField(
+                    controller: controller.nisnController,
+                    validator: (val) => val == null || val.trim().isEmpty ? 'NISN wajib diisi' : null,
+                    decoration: const InputDecoration(
+                      hintText: 'Nomor Induk Siswa Nasional',
+                      prefixIcon: Icon(
+                        Icons.badge_outlined,
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const Gap(20),
+                  Text('Kelas', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  Obx(
+                    () => DropdownButtonFormField<String>(
+                      value: controller.selectedKelas.value,
+                      items: controller.kelasOptions
+                          .map(
+                            (kelas) => DropdownMenuItem(value: kelas, child: Text('Kelas $kelas')),
+                          )
+                          .toList(),
+                      onChanged: (value) => controller.selectedKelas.value = value ?? 'X',
+                      decoration: const InputDecoration(
+                        hintText: 'Pilih kelas',
+                        prefixIcon: Icon(
+                          Icons.class_outlined,
+                          color: AppColors.grey400,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(20),
+                  Text('Sekolah', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  TextFormField(
+                    controller: controller.sekolahController,
+                    validator: (val) => val == null || val.trim().isEmpty ? 'Sekolah wajib diisi' : null,
+                    decoration: const InputDecoration(
+                      hintText: 'Nama Sekolah asal',
+                      prefixIcon: Icon(
+                        Icons.school_outlined,
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                  ),
+                  const Gap(20),
+                ],
+              );
+            }
+          }),
+
+          // Mapel Dropdown (Guru)
+          Obx(() {
+            if (controller.selectedRole.value == 'guru') {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Mata Pelajaran', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: controller.mapelOptions.map((mapel) {
+                      return Obx(() {
+                        final isSelected = controller.selectedMapel.contains(mapel);
+                        return FilterChip(
+                          label: Text(mapel),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              controller.selectedMapel.add(mapel);
+                            } else {
+                              controller.selectedMapel.remove(mapel);
+                            }
+                          },
+                          selectedColor: AppColors.primaryPurple.withOpacity(0.2),
+                          checkmarkColor: AppColors.primaryPurple,
+                          labelStyle: TextStyle(
+                            color: isSelected ? AppColors.primaryPurple : AppColors.grey700,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        );
+                      });
+                    }).toList(),
+                  ),
+                  const Gap(20),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
+          // Jurusan Dropdown (Siswa)
+          Obx(() {
+            if (controller.selectedRole.value == 'siswa') {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Jurusan', style: Theme.of(context).textTheme.titleMedium),
+                  const Gap(8),
+                  DropdownButtonFormField<String>(
+                    value: controller.selectedJurusan.value,
+                    items: controller.jurusanOptions
+                        .map(
+                          (jurusan) =>
+                              DropdownMenuItem(value: jurusan, child: Text(jurusan)),
+                        )
+                        .toList(),
+                    onChanged: (value) => controller.selectedJurusan.value = value ?? '',
+                    decoration: const InputDecoration(
+                      hintText: 'Pilih jurusan',
+                      prefixIcon: Icon(Icons.school_outlined, color: AppColors.grey400),
+                    ),
+                  ),
+                  const Gap(20),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
+          // Password
+          Text('Password', style: Theme.of(context).textTheme.titleMedium),
+          const Gap(8),
+          Obx(
+            () => TextFormField(
+              controller: controller.passwordController,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'Password tidak boleh kosong';
+                if (val.length < 8) return 'Minimal 8 karakter';
+                return null;
+              },
+              decoration: InputDecoration(
+                hintText: 'minimal 8 karakter',
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
                   color: AppColors.grey400,
                 ),
-                onPressed: () => controller.obscurePass.toggle(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.obscurePass.value
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.grey400,
+                  ),
+                  onPressed: () => controller.obscurePass.toggle(),
+                ),
               ),
+              obscureText: controller.obscurePass.value,
+              onChanged: (value) => controller.checkPasswordStrength(value),
             ),
-            obscureText: controller.obscurePass.value,
-            onChanged: (value) => controller.checkPasswordStrength(value),
           ),
-        ),
-        const Gap(8),
-        _PasswordStrengthBar(strength: controller.passwordStrength),
-        const Gap(20),
+          const Gap(8),
+          _PasswordStrengthBar(strength: controller.passwordStrength),
+          const Gap(20),
 
-        // Confirm Password
-        Text(
-          'Konfirmasi Password',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const Gap(8),
-        Obx(
-          () => TextField(
-            controller: controller.confirmPasswordController,
-            decoration: InputDecoration(
-              hintText: 'ulangi password',
-              prefixIcon: const Icon(
-                Icons.lock_outline,
-                color: AppColors.grey400,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  controller.obscureConfirm.value
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+          // Confirm Password
+          Text(
+            'Konfirmasi Password',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const Gap(8),
+          Obx(
+            () => TextFormField(
+              controller: controller.confirmPasswordController,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'Konfirmasi password wajib diisi';
+                if (val != controller.passwordController.text) return 'Password tidak cocok';
+                return null;
+              },
+              decoration: InputDecoration(
+                hintText: 'ulangi password',
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
                   color: AppColors.grey400,
                 ),
-                onPressed: () => controller.obscureConfirm.toggle(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.obscureConfirm.value
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.grey400,
+                  ),
+                  onPressed: () => controller.obscureConfirm.toggle(),
+                ),
               ),
+              obscureText: controller.obscureConfirm.value,
             ),
-            obscureText: controller.obscureConfirm.value,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

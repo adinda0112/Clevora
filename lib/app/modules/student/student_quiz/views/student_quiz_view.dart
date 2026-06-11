@@ -126,6 +126,22 @@ class StudentQuizView extends GetView<StudentQuizController> {
                           ),
                         ],
                       ),
+                      const Gap(8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: controller.isCompleted(quiz.id) ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          controller.isCompleted(quiz.id) ? 'SUDAH TERSELESAIKAN' : 'BELUM TERSELESAIKAN',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: controller.isCompleted(quiz.id) ? Colors.red : Colors.green,
+                          ),
+                        ),
+                      ),
                       const Gap(12),
                       Text(
                         quiz.judul,
@@ -177,28 +193,32 @@ class StudentQuizView extends GetView<StudentQuizController> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              Get.toNamed(Routes.EXAM_INSTRUCTION, arguments: quiz);
+                              if (controller.isCompleted(quiz.id)) {
+                                Get.toNamed(Routes.STUDENT_RESULT);
+                              } else {
+                                Get.toNamed(Routes.EXAM_INSTRUCTION, arguments: quiz);
+                              }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryPurple,
+                              backgroundColor: controller.isCompleted(quiz.id) ? Colors.red : Colors.green,
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               elevation: 0,
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
                                 Text(
-                                  'Mulai',
-                                  style: TextStyle(
+                                  controller.isCompleted(quiz.id) ? 'Lihat Hasil' : 'Mulai',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Gap(4),
-                                Icon(Icons.arrow_forward, color: Colors.white, size: 14),
+                                const Gap(4),
+                                const Icon(Icons.arrow_forward, color: Colors.white, size: 14),
                               ],
                             ),
                           ),

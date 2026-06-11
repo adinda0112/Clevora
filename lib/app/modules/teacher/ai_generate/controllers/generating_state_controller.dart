@@ -12,6 +12,7 @@ class GeneratingStateController extends GetxController {
   final additionalPrompt = ''.obs;
   
   final statusText = 'Memulai proses...'.obs;
+  bool _isDisposed = false;
 
   @override
   void onInit() {
@@ -27,15 +28,24 @@ class GeneratingStateController extends GetxController {
     _startAiGeneration();
   }
 
+  @override
+  void onClose() {
+    _isDisposed = true;
+    super.onClose();
+  }
+
   void _startAiGeneration() async {
     try {
       await Future.delayed(const Duration(milliseconds: 600));
+      if (_isDisposed) return;
       statusText.value = 'Menganalisis kompetensi dasar & topik...';
       
       await Future.delayed(const Duration(milliseconds: 600));
+      if (_isDisposed) return;
       statusText.value = 'Menyusun prompt pembelajaran terbaik...';
       
       await Future.delayed(const Duration(milliseconds: 600));
+      if (_isDisposed) return;
       statusText.value = 'Menghubungi mesin kecerdasan buatan Gemini AI...';
       
       // Make the actual REST API call to backend
@@ -47,9 +57,11 @@ class GeneratingStateController extends GetxController {
         additionalPrompt: additionalPrompt.value,
       );
 
+      if (_isDisposed) return;
       statusText.value = 'Memformulasikan format dokumen Merdeka...';
       await Future.delayed(const Duration(milliseconds: 500));
 
+      if (_isDisposed) return;
       Get.offNamed(Routes.AI_RESULT, arguments: {
         'type': generateType.value,
         'topik': topik.value,
@@ -58,12 +70,14 @@ class GeneratingStateController extends GetxController {
         'mapel': mapel.value,
       });
     } catch (e) {
+      if (_isDisposed) return;
       Get.snackbar(
         'Gagal',
         'Gagal membuat perangkat ajar: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
       Future.delayed(const Duration(seconds: 2), () {
+        if (_isDisposed) return;
         Get.back(); // Go back to form
       });
     }

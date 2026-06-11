@@ -99,7 +99,7 @@ class AuthService extends GetxService {
     String? kelas,
     String? sekolah,
     String? mapel,
-    String? jenjang,
+    String? jurusan,
   }) async {
     try {
       final data = {
@@ -108,7 +108,7 @@ class AuthService extends GetxService {
         'password': password,
         'role': role,
         'mapel': mapel,
-        'jenjang': jenjang,
+        'jurusan': jurusan,
       };
       if (nip != null && nip.isNotEmpty) {
         data['nip'] = nip;
@@ -203,6 +203,27 @@ class AuthService extends GetxService {
       if (e.response?.statusCode == 401) {
         logout();
       }
+      throw _handleDioError(e);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<void> updateUser(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiProvider.dio.put(
+        '/auth/update/$id',
+        data: data,
+      );
+      
+      if (response.data['success'] == true) {
+        final updatedUser = UserModel.fromJson(response.data['data']);
+        await _storage.write('user', updatedUser.toJson());
+        currentUser.value = updatedUser;
+      } else {
+        throw response.data['message'] ?? 'Gagal memperbarui profil';
+      }
+    } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
       throw e.toString();
