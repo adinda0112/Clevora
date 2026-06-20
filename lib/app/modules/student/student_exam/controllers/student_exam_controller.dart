@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/models/quiz_model.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
+import 'package:clevora/app/data/services/face_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 
 class StudentExamController extends GetxController with WidgetsBindingObserver {
   final QuizService _quizService = Get.find<QuizService>();
+  final FaceService _faceService = Get.find<FaceService>();
 
   final quiz = Rxn<QuizModel>();
   final warningCount = 0.obs;
@@ -16,28 +21,51 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
   final isSubmitting = false.obs;
 
   Timer? _timer;
+  Timer? _proctorTimer;
 
   // Reactively track selected answers for each question (-1 means unselected)
   final selectedAnswers = <int>[].obs;
+
+  // Proctoring Camera variables
+  CameraController? cameraController;
+  final isCameraInitialized = false.obs;
+  bool isProctoringActive = false;
+  String resultId = '';
 
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    final args = Get.arguments as QuizModel?;
+    
+    final args = Get.arguments as Map<String, dynamic>?;
     if (args != null) {
-      quiz.value = args;
-      timeRemaining.value = args.durasi * 60;
-      // Initialize selected answers with -1
-      selectedAnswers.assignAll(List.generate(args.soal.length, (_) => -1));
+      final quizObj = args['quiz'] as QuizModel?;
+      resultId = args['resultId'] as String? ?? '';
+      
+      if (quizObj != null) {
+        quiz.value = quizObj;
+        timeRemaining.value = quizObj.durasi * 60;
+        selectedAnswers.assignAll(List.generate(quizObj.soal.length, (_) => -1));
+
+        // Proctoring active ONLY for Ujian (not pretest or posttest)
+        final title = quizObj.judul.toLowerCase();
+        isProctoringActive = !title.contains('pretest') && !title.contains('posttest');
+      }
     }
+
     startTimer();
+
+    if (isProctoringActive) {
+      _initializeProctoringCamera();
+    }
   }
 
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _proctorTimer?.cancel();
+    cameraController?.dispose();
     super.onClose();
   }
 
@@ -47,6 +75,102 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       simulateWarning();
     }
+  }
+
+  Future<void> _initializeProctoringCamera() async {
+    try {
+      final cameras = await availableCameras();
+      final frontCamera = cameras.firstWhere(
+        (cam) => cam.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
+
+      cameraController = CameraController(
+        frontCamera,
+        ResolutionPreset.medium, // Ubah ke medium agar tidak terlalu blur (membantu deteksi wajah OpenCV)
+        enableAudio: false,
+      );
+
+      await cameraController!.initialize();
+      isCameraInitialized.value = true;
+      _startProctoringTimer();
+    } catch (e) {
+      Get.log('Failed to initialize proctoring camera: $e');
+    }
+  }
+
+  void _startProctoringTimer() {
+    // Send frame to backend every 4 seconds for processing
+    _proctorTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
+      if (cameraController == null || !isCameraInitialized.value || isSubmitting.value) return;
+
+      try {
+        final image = await cameraController!.takePicture();
+        final file = File(image.path);
+        
+        // Compress frame to reduce bandwidth and latency
+        final compressedFile = await FlutterImageCompress.compressAndGetFile(
+          file.absolute.path,
+          '${file.parent.absolute.path}/temp_frame.jpg',
+          quality: 50, // Low quality is enough for simple face detection
+          minWidth: 480, // Scale down to max 480px width
+          minHeight: 480,
+        );
+
+        if (compressedFile == null) return;
+
+        // Send frame to backend
+        final result = await _faceService.sendProctorFrame(resultId, compressedFile.path);
+
+        // Delete temporary captured file on local storage to save space
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+        final cFile = File(compressedFile.path);
+        if (cFile.existsSync()) {
+          cFile.deleteSync();
+        }
+
+        // Process response
+        final violationDetected = result['violationDetected'] as bool? ?? false;
+        final serverWarningCount = result['warningCount'] as int? ?? 0;
+        final berakhirPaksa = result['berakhirPaksa'] as bool? ?? false;
+
+        if (violationDetected) {
+          warningCount.value = serverWarningCount;
+          final violationType = result['violationType'] as String? ?? '';
+
+          String friendlyMessage = 'Terdeteksi pelanggaran!';
+          if (violationType == 'wajah_tidak_ada') {
+            friendlyMessage = 'Wajah tidak terdeteksi di kamera.';
+          } else if (violationType == 'multi_wajah') {
+            friendlyMessage = 'Terdeteksi lebih dari satu wajah.';
+          } else if (violationType == 'menoleh') {
+            friendlyMessage = 'Jangan menoleh terlalu lama dari layar.';
+          } else if (violationType == 'dua_tangan') {
+            friendlyMessage = 'Terdeteksi posisi tangan mencurigahkan.';
+          }
+
+          Get.snackbar(
+            'Peringatan Sistem',
+            '$friendlyMessage (${warningCount.value}/3)',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+            icon: const Icon(Icons.warning, color: Colors.white),
+          );
+
+          if (berakhirPaksa || warningCount.value >= 3) {
+            _timer?.cancel();
+            _proctorTimer?.cancel();
+            submitExam(autoSubmit: false, forced: true);
+          }
+        }
+      } catch (e) {
+        Get.log('Error during periodic proctoring frame check: $e');
+      }
+    });
   }
 
   void startTimer() {
@@ -99,6 +223,7 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
 
     if (warningCount.value >= 3) {
       _timer?.cancel();
+      _proctorTimer?.cancel();
       submitExam(autoSubmit: false, forced: true);
     }
   }
@@ -121,6 +246,7 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
   Future<void> submitExam({bool autoSubmit = false, bool forced = false}) async {
     if (isSubmitting.value) return;
     _timer?.cancel();
+    _proctorTimer?.cancel();
     isSubmitting.value = true;
 
     try {

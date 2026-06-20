@@ -4,6 +4,6 @@ import 'package:clevora/app/modules/auth/splash/controllers/splash_controller.da
 class SplashBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(SplashController());
+    Get.lazyPut<SplashController>(() => SplashController());
   }
 }

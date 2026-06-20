@@ -97,12 +97,21 @@ class ExamInstructionView extends GetView<ExamInstructionController> {
               width: double.infinity,
               height: 48,
               child: Obx(() => ElevatedButton(
-                onPressed: controller.isChecked.value ? controller.startExam : null,
+                onPressed: controller.isChecked.value && !controller.isLoading.value ? controller.startExam : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryPurple,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Mulai Ujian Sekarang', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Mulai Ujian Sekarang', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               )),
             ),
           ],

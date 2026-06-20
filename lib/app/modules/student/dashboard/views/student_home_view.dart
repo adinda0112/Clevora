@@ -4,9 +4,10 @@ import 'package:gap/gap.dart';
 
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/widgets/menu_card.dart';
-import 'package:clevora/app/widgets/stat_card.dart';
+
 import 'package:clevora/app/modules/student/dashboard/controllers/student_home_controller.dart';
-import 'package:clevora/app/routes/app_routes.dart';
+
+import 'package:clevora/app/modules/student/student_main/controllers/student_main_controller.dart';
 
 class StudentHomeView extends GetView<StudentHomeController> {
   const StudentHomeView({super.key});
@@ -51,36 +52,34 @@ class StudentHomeView extends GetView<StudentHomeController> {
                   () => Text(
                     controller.userRole.value,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
-                const Gap(16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search, color: Colors.white70, size: 18),
-                      const Gap(8),
-                      Text(
-                        'Cari modul, materi, kuis...',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                        ),
+                  const Gap(16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.snackbar('QR Absen', 'Fitur scan QR absen sedang dalam pengembangan');
+                      },
+                      icon: const Icon(Icons.qr_code_scanner, color: AppColors.primaryPurple),
+                      label: const Text(
+                        'Absen dengan QR',
+                        style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold),
                       ),
-                    ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           // Content
           Expanded(
@@ -89,26 +88,7 @@ class StudentHomeView extends GetView<StudentHomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Stats Row
                   const Gap(10),
-                  Obx(
-                    () => Row(
-                      children: controller.stats.map((stat) {
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: StatCard(
-                              title: stat['title'],
-                              value: stat['value'],
-                              color: stat['color'],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  const Gap(24),
                   const Text(
                     'Menu siswa',
                     style: TextStyle(
@@ -140,9 +120,9 @@ class StudentHomeView extends GetView<StudentHomeController> {
                           textColor: item['text'],
                           onTap: () {
                             if (index == 0) {
-                              Get.toNamed(Routes.LEARNING);
+                              Get.find<StudentMainController>().changePage(1); // Ke tab Learning
                             } else if (index == 1 || index == 2 || index == 3) {
-                              Get.toNamed(Routes.STUDENT_QUIZ);
+                              Get.find<StudentMainController>().changePage(2); // Ke tab Kuis
                             } else {
                               Get.snackbar(
                                 'Informasi',
@@ -232,6 +212,32 @@ class StudentHomeView extends GetView<StudentHomeController> {
                           ),
                         );
                       }).toList(),
+                    ),
+                  ),
+                  const Gap(24),
+                  const Text(
+                    'Jelajah',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.grey900,
+                    ),
+                  ),
+                  const Gap(12),
+                  // Video Placeholder
+                  Container(
+                    width: double.infinity,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(16),
+                      image: const DecorationImage(
+                        image: NetworkImage('https://via.placeholder.com/600x400/000000/FFFFFF/?text=Video+Hasil+Bigdata'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.play_circle_fill, color: Colors.white, size: 64),
                     ),
                   ),
                 ],

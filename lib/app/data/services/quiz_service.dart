@@ -1,11 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/models/quiz_model.dart';
 import 'package:clevora/app/data/models/question_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 
 class QuizService extends GetxService {
-  final ApiProvider _apiProvider = ApiProvider();
+  final ApiProvider _apiProvider = Get.find<ApiProvider>();
 
   // Get all quizzes
   Future<List<QuizModel>> getQuizzes() async {
@@ -84,6 +83,31 @@ class QuizService extends GetxService {
         return QuestionModel.fromJson(response.data['data']);
       }
       throw 'Gagal menambahkan soal kuis';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Start / resume quiz (Siswa)
+  Future<Map<String, dynamic>> startQuiz(String quizId) async {
+    try {
+      final response = await _apiProvider.dio.post('/kuis/$quizId/start');
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw 'Gagal memulai kuis';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Share quiz to a class (Guru)
+  Future<void> shareQuiz(String quizId, String kelas) async {
+    try {
+      await _apiProvider.dio.patch(
+        '/kuis/$quizId/share',
+        data: {'kelas': kelas},
+      );
     } catch (e) {
       rethrow;
     }

@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:clevora/app/data/models/user_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
+import 'package:clevora/app/data/repositories/auth_repository.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 
 class AuthService extends GetxService {
-  final ApiProvider _apiProvider = ApiProvider();
+  final ApiProvider _apiProvider = Get.find<ApiProvider>();
+  final AuthRepository _authRepository = Get.find<AuthRepository>();
   final GetStorage _storage = GetStorage();
   
   final currentUser = Rxn<UserModel>();
@@ -29,30 +31,31 @@ class AuthService extends GetxService {
 
   String get token => _storage.read<String>('token') ?? '';
 
+  void _saveSession(AuthResponse authResponse) {
+    if (authResponse.token != null && authResponse.user != null) {
+      _storage.write('token', authResponse.token);
+      _storage.write('user', authResponse.user!.toJson());
+      currentUser.value = authResponse.user;
+      isAuthenticated.value = true;
+    }
+  }
+
   Future<AuthResponse> login({
     required String email,
     required String password,
     required String role,
   }) async {
     try {
-      final response = await _apiProvider.dio.post(
-        '/auth/login',
-        data: {
-          'email': email,
-          'password': password,
-          'role': role,
-        },
-      );
-
-      final authResponse = AuthResponse.fromJson(response.data);
-      if (authResponse.success && authResponse.token != null && authResponse.user != null) {
-        await _storage.write('token', authResponse.token);
-        await _storage.write('user', authResponse.user!.toJson());
-        currentUser.value = authResponse.user;
-        isAuthenticated.value = true;
-      }
+      final response = await _authRepository.login(email, password, role);
+      final authResponse = AuthResponse.fromJson(response);
+      _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
+      if (e.response?.statusCode == 403 && e.response?.data?['unverified'] == true) {
+        final email = e.response?.data?['email'] ?? '';
+        resendOtp(email: email);
+        Get.toNamed(Routes.OTP, arguments: {'email': email});
+      }
       throw _handleDioError(e);
     } catch (e) {
       throw e.toString();
@@ -65,22 +68,9 @@ class AuthService extends GetxService {
     required String role,
   }) async {
     try {
-      final response = await _apiProvider.dio.post(
-        '/auth/google',
-        data: {
-          'idToken': idToken,
-          'accessToken': accessToken,
-          'role': role,
-        },
-      );
-
-      final authResponse = AuthResponse.fromJson(response.data);
-      if (authResponse.success && authResponse.token != null && authResponse.user != null) {
-        await _storage.write('token', authResponse.token);
-        await _storage.write('user', authResponse.user!.toJson());
-        currentUser.value = authResponse.user;
-        isAuthenticated.value = true;
-      }
+      final response = await _authRepository.googleSignIn(idToken, accessToken, role);
+      final authResponse = AuthResponse.fromJson(response);
+      _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -99,7 +89,7 @@ class AuthService extends GetxService {
     String? kelas,
     String? sekolah,
     String? mapel,
-    String? jenjang,
+    String? jurusan,
   }) async {
     try {
       final data = {
@@ -108,7 +98,7 @@ class AuthService extends GetxService {
         'password': password,
         'role': role,
         'mapel': mapel,
-        'jenjang': jenjang,
+        'jurusan': jurusan,
       };
       if (nip != null && nip.isNotEmpty) {
         data['nip'] = nip;
@@ -123,16 +113,8 @@ class AuthService extends GetxService {
         data['sekolah'] = sekolah;
       }
 
-      final response = await _apiProvider.dio.post(
-        '/auth/register',
-        data: data,
-      );
-
-      final dynamic resData = response.data;
-      if (resData is Map) {
-        return resData['success'] ?? false;
-      }
-      return false;
+      final response = await _authRepository.register(data);
+      return response['success'] ?? false;
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
@@ -145,21 +127,9 @@ class AuthService extends GetxService {
     required String otp,
   }) async {
     try {
-      final response = await _apiProvider.dio.post(
-        '/auth/verify-otp',
-        data: {
-          'email': email,
-          'otp': otp,
-        },
-      );
-
-      final authResponse = AuthResponse.fromJson(response.data);
-      if (authResponse.success && authResponse.token != null && authResponse.user != null) {
-        await _storage.write('token', authResponse.token);
-        await _storage.write('user', authResponse.user!.toJson());
-        currentUser.value = authResponse.user;
-        isAuthenticated.value = true;
-      }
+      final response = await _authRepository.verifyOtp(email, otp);
+      final authResponse = AuthResponse.fromJson(response);
+      _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -203,6 +173,27 @@ class AuthService extends GetxService {
       if (e.response?.statusCode == 401) {
         logout();
       }
+      throw _handleDioError(e);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<void> updateUser(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiProvider.dio.put(
+        '/auth/update/$id',
+        data: data,
+      );
+      
+      if (response.data['success'] == true) {
+        final updatedUser = UserModel.fromJson(response.data['data']);
+        await _storage.write('user', updatedUser.toJson());
+        currentUser.value = updatedUser;
+      } else {
+        throw response.data['message'] ?? 'Gagal memperbarui profil';
+      }
+    } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {
       throw e.toString();

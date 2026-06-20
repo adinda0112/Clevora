@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
+import 'package:clevora/app/widgets/camera_dialog.dart';
 
 class OtpController extends GetxController {
   final otpCode = ''.obs;
@@ -12,7 +13,7 @@ class OtpController extends GetxController {
   final canResend = false.obs;
 
   String email = '';
-  late Timer _countdownTimer;
+  Timer? _countdownTimer;
   final AuthService _authService = Get.find<AuthService>();
 
   @override
@@ -23,6 +24,7 @@ class OtpController extends GetxController {
   }
 
   void _startCountdown() {
+    _countdownTimer?.cancel();
     canResend.value = false;
     countdown.value = 300;
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -30,7 +32,7 @@ class OtpController extends GetxController {
         countdown.value--;
       } else {
         canResend.value = true;
-        _countdownTimer.cancel();
+        _countdownTimer?.cancel();
       }
     });
   }
@@ -60,13 +62,25 @@ class OtpController extends GetxController {
 
       if (result.success) {
         isSuccess.value = true;
-        await Future.delayed(const Duration(seconds: 1500 ~/ 1000));
+        await Future.delayed(const Duration(milliseconds: 1500));
         
         final user = _authService.currentUser.value;
+        isLoading.value = false;
         if (user != null) {
           if (user.role == 'guru') {
             Get.offAllNamed(Routes.TEACHER_MAIN);
           } else {
+            // Prompt face registration for new siswa
+            if (!user.sudahDaftarWajah) {
+              await Get.dialog<bool>(
+                const CameraDialog(
+                  title: 'Daftarkan Wajah',
+                  isRegistration: true,
+                ),
+                barrierDismissible: false,
+              );
+              await _authService.getMe();
+            }
             Get.offAllNamed(Routes.STUDENT_MAIN);
           }
         } else {
@@ -80,16 +94,19 @@ class OtpController extends GetxController {
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade900,
         );
+        isLoading.value = false;
       }
     } catch (e) {
-      Get.snackbar(
-        "Verifikasi Gagal",
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
-      );
-    } finally {
+      debugPrint("OTP VERIFY ERROR: ${e.toString()}");
+      try {
+        Get.snackbar(
+          "Verifikasi Gagal",
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+        );
+      } catch (_) {}
       isLoading.value = false;
     }
   }
@@ -118,19 +135,22 @@ class OtpController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "Gagal",
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
-      );
+      debugPrint("OTP RESEND ERROR: ${e.toString()}");
+      try {
+        Get.snackbar(
+          "Gagal",
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+        );
+      } catch (_) {}
     }
   }
 
   @override
   void onClose() {
-    _countdownTimer.cancel();
+    _countdownTimer?.cancel();
     super.onClose();
   }
 }

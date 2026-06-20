@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gap/gap.dart';
+import 'package:camera/camera.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/student/student_exam/controllers/student_exam_controller.dart';
 
@@ -58,27 +60,61 @@ class StudentExamView extends GetView<StudentExamController> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Camera Placeholder
-                  Container(
-                    width: 80,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.grey200,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.grey300),
-                    ),
-                    child: const Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Icon(Icons.face, size: 40, color: AppColors.grey400),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Icon(Icons.fiber_manual_record, color: Colors.red, size: 12),
+                  // Camera / Proctoring Feed
+                  Obx(() {
+                    if (controller.isProctoringActive && controller.isCameraInitialized.value && controller.cameraController != null) {
+                      return Container(
+                        width: 80,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red, width: 1.5),
                         ),
-                      ],
-                    ),
-                  ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CameraPreview(controller.cameraController!),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    // Static default face fallback
+                    return Container(
+                      width: 80,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: AppColors.grey200,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.grey300),
+                      ),
+                      child: const Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(Icons.face, size: 40, color: AppColors.grey400),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Icon(Icons.fiber_manual_record, color: Colors.grey, size: 12),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                   const Gap(16),
                   // Progress
                   Expanded(
@@ -113,13 +149,15 @@ class StudentExamView extends GetView<StudentExamController> {
                           }
                           return const SizedBox.shrink();
                         }),
-                        const Gap(4),
-                        TextButton.icon(
-                          onPressed: controller.simulateWarning,
-                          icon: const Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange),
-                          label: const Text('Simulate Warning', style: TextStyle(color: Colors.orange, fontSize: 12)),
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                        ),
+                        if (kDebugMode) ...[
+                          const Gap(4),
+                          TextButton.icon(
+                            onPressed: controller.simulateWarning,
+                            icon: const Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange),
+                            label: const Text('Simulate Warning', style: TextStyle(color: Colors.orange, fontSize: 12)),
+                            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                          ),
+                        ],
                       ],
                     ),
                   ),

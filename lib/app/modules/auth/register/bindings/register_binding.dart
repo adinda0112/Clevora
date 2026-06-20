@@ -4,6 +4,6 @@ import 'package:clevora/app/modules/auth/register/controllers/register_controlle
 class RegisterBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(RegisterController());
+    Get.lazyPut<RegisterController>(() => RegisterController());
   }
 }

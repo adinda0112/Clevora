@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 class ParsedQuestion {
   final String questionText;
@@ -28,6 +29,9 @@ class AiResultController extends GetxController {
   final mapel = ''.obs;
 
   final isSaving = false.obs;
+  final isEditing = false.obs;
+  final hasSaved = false.obs;
+  final textEditController = TextEditingController();
 
   @override
   void onInit() {
@@ -39,7 +43,14 @@ class AiResultController extends GetxController {
       resultText.value = args['result'] ?? 'Tidak ada konten hasil generate.';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
+      textEditController.text = resultText.value;
     }
+  }
+
+  @override
+  void onClose() {
+    textEditController.dispose();
+    super.onClose();
   }
 
   List<ParsedQuestion> _parseQuizMarkdown(String text) {
@@ -170,32 +181,71 @@ class AiResultController extends GetxController {
     return questions;
   }
 
-  Future<void> saveAndPublish() async {
+  void toggleEdit() {
+    if (isEditing.value) {
+      // Save changes
+      resultText.value = textEditController.text;
+    }
+    isEditing.toggle();
+  }
+
+  void finishProcess() {
+    Get.until((route) => Get.currentRoute == Routes.MODULE_AI || Get.currentRoute == Routes.TEACHER_HOME);
+  }
+
+  /// Save only — no share dialog
+  Future<void> saveOnly() async {
+    await _doSave(shareClass: null);
+    if (hasSaved.value) {
+      // Navigate to appropriate history page
+      if (generateType.value == 'Quiz') {
+        Get.until((route) =>
+            Get.currentRoute == Routes.QUIZ_MANAGEMENT ||
+            Get.currentRoute == Routes.TEACHER_MAIN ||
+            Get.currentRoute == Routes.TEACHER_HOME);
+      } else {
+        Get.until((route) =>
+            Get.currentRoute == Routes.MODULE_AI ||
+            Get.currentRoute == Routes.TEACHER_MAIN ||
+            Get.currentRoute == Routes.TEACHER_HOME);
+      }
+    }
+  }
+
+  /// Save + share to a selected class
+  Future<void> saveAndShare({required String shareClass}) async {
+    await _doSave(shareClass: shareClass);
+  }
+
+  Future<void> _doSave({String? shareClass}) async {
     isSaving.value = true;
     try {
-      if (generateType.value == 'Modul' || generateType.value == 'Materi' || generateType.value == 'ATP') {
+      if (generateType.value == 'Modul' ||
+          generateType.value == 'Materi' ||
+          generateType.value == 'ATP') {
         await _moduleService.createModule(
           judul: '${generateType.value}: ${topik.value}',
           konten: resultText.value,
-          deskripsi: 'Dokumen ${generateType.value} hasil rancangan Clevora AI untuk Kelas ${kelas.value} mata pelajaran ${mapel.value}.',
+          deskripsi:
+              'Dokumen ${generateType.value} hasil rancangan Clevora AI untuk Kelas ${kelas.value} mata pelajaran ${mapel.value}.',
           mapel: mapel.value,
-          kelas: kelas.value,
+          kelas: shareClass ?? kelas.value,
           jenjang: 'SMA',
+          jenis: generateType.value,
         );
       } else if (generateType.value == 'Quiz') {
         final parsed = _parseQuizMarkdown(resultText.value);
         if (parsed.isEmpty) {
-          throw 'Format kuis hasil AI tidak dapat diproses secara otomatis. Harap buat kuis manual atau generate ulang.';
+          throw 'Format kuis hasil AI tidak dapat diproses. Harap generate ulang atau buat manual.';
         }
-
         final newQuiz = await _quizService.createQuiz(
           judul: 'Kuis AI: ${topik.value}',
-          deskripsi: 'Evaluasi Pembelajaran Mandiri untuk Kelas ${kelas.value} mata pelajaran ${mapel.value} hasil rancangan Clevora AI.',
+          deskripsi:
+              'Evaluasi Pembelajaran Mandiri untuk Kelas ${shareClass ?? kelas.value} mata pelajaran ${mapel.value} hasil rancangan Clevora AI.',
           mapel: mapel.value,
-          kelas: kelas.value,
+          kelas: shareClass ?? kelas.value,
           durasi: 30,
         );
-
         for (var q in parsed) {
           await _quizService.addQuestion(
             newQuiz.id,
@@ -209,20 +259,18 @@ class AiResultController extends GetxController {
 
       Get.snackbar(
         'Berhasil',
-        '${generateType.value} berhasil disimpan dan dipublish ke siswa!',
+        '${generateType.value} berhasil disimpan${shareClass != null ? ' dan dishare ke kelas $shareClass!' : '!'}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFEAF3DE),
         colorText: const Color(0xFF3B6D11),
         margin: const EdgeInsets.all(16),
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.back();
-      });
+      hasSaved.value = true;
     } catch (e) {
       Get.snackbar(
         'Gagal',
-        'Gagal mempublikasikan dokumen: $e',
+        'Gagal menyimpan: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {

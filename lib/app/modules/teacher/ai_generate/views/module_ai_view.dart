@@ -37,7 +37,7 @@ class ModuleAiView extends StatelessWidget {
                       children: [
                         const Text('Asisten AI Guru', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        Text('Buat perangkat ajar dan soal dalam hitungan detik.', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
+                        Text('Buat perangkat ajar dan soal dalam hitungan detik.', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
                       ],
                     ),
                   ),
@@ -78,7 +78,7 @@ class ModuleAiView extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.grey200),
           boxShadow: [
-            BoxShadow(color: AppColors.grey200.withOpacity(0.5), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(color: AppColors.grey200.withValues(alpha: 0.5), blurRadius: 10, offset: const Offset(0, 4)),
           ],
         ),
         child: Column(

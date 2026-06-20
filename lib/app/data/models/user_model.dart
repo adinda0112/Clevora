@@ -13,6 +13,7 @@ class UserModel {
   final String? fcmToken;
   final String? mapel;
   final String? jenjang;
+  final String? jurusan;
 
   UserModel({
     required this.id,
@@ -29,6 +30,7 @@ class UserModel {
     this.fcmToken,
     this.mapel,
     this.jenjang,
+    this.jurusan,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class UserModel {
       fcmToken: json['fcm_token'] ?? json['fcmToken'],
       mapel: json['mapel'],
       jenjang: json['jenjang'],
+      jurusan: json['jurusan'],
     );
   }
 
@@ -66,6 +69,7 @@ class UserModel {
       'fcm_token': fcmToken,
       'mapel': mapel,
       'jenjang': jenjang,
+      'jurusan': jurusan,
     };
   }
 }

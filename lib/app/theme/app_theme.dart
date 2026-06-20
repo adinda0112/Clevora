@@ -31,7 +31,7 @@ static const grey800 = Color(0xFF1F2937);
 
   static List<BoxShadow> get cardShadow => [
         BoxShadow(
-          color: grey900.withOpacity(0.05),
+          color: grey900.withValues(alpha: 0.05),
           blurRadius: 20,
           offset: const Offset(0, 10),
         ),

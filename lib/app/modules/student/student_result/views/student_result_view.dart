@@ -30,7 +30,7 @@ class StudentResultView extends GetView<StudentResultController> {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.grey200),
                 boxShadow: [
-                  BoxShadow(color: AppColors.grey200.withOpacity(0.5), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(color: AppColors.grey200.withValues(alpha: 0.5), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
               child: Column(
@@ -51,10 +51,14 @@ class StudentResultView extends GetView<StudentResultController> {
                   const Gap(8),
                   const Text('Nilai Akhir', style: TextStyle(fontSize: 14, color: AppColors.grey500)),
                   const Gap(4),
-                  Obx(() => Text(
-                    '${controller.score.value}',
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.darkPurple),
-                  )),
+                  Obx(() {
+                    final val = controller.score.value;
+                    final displayVal = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
+                    return Text(
+                      displayVal,
+                      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.darkPurple),
+                    );
+                  }),
                   const Gap(24),
                   const Divider(),
                   const Gap(24),

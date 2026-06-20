@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/models/module_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 
 class ModuleService extends GetxService {
-  final ApiProvider _apiProvider = ApiProvider();
+  final ApiProvider _apiProvider = Get.find<ApiProvider>();
 
   // Get all learning modules
   Future<List<ModuleModel>> getModules() async {
@@ -41,6 +40,7 @@ class ModuleService extends GetxService {
     String? mapel,
     String? jenjang,
     String? kelas,
+    String? jenis,
   }) async {
     try {
       final response = await _apiProvider.dio.post(
@@ -52,6 +52,7 @@ class ModuleService extends GetxService {
           'mapel': mapel,
           'jenjang': jenjang,
           'kelas': kelas,
+          'jenis': jenis,
         },
       );
       if (response.data != null && response.data['data'] != null) {
@@ -74,16 +75,17 @@ class ModuleService extends GetxService {
     String? kelas,
   }) async {
     try {
+      final Map<String, dynamic> reqData = {};
+      if (judul != null) reqData['judul'] = judul;
+      if (konten != null) reqData['konten'] = konten;
+      if (deskripsi != null) reqData['deskripsi'] = deskripsi;
+      if (mapel != null) reqData['mapel'] = mapel;
+      if (jenjang != null) reqData['jenjang'] = jenjang;
+      if (kelas != null) reqData['kelas'] = kelas;
+
       final response = await _apiProvider.dio.put(
         '/modul/$id',
-        data: {
-          if (judul != null) 'judul': judul,
-          if (konten != null) 'konten': konten,
-          if (deskripsi != null) 'deskripsi': deskripsi,
-          if (mapel != null) 'mapel': mapel,
-          if (jenjang != null) 'jenjang': jenjang,
-          if (kelas != null) 'kelas': kelas,
-        },
+        data: reqData,
       );
       if (response.data != null && response.data['data'] != null) {
         return ModuleModel.fromJson(response.data['data']);

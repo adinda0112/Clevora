@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:gap/gap.dart';
 
 import 'package:clevora/app/modules/shared/profile/controllers/profile_controller.dart';
-import 'package:clevora/app/routes/app_routes.dart';
+
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -103,7 +103,7 @@ class ProfileView extends GetView<ProfileController> {
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 18,
                         offset: const Offset(0, 12),
                       ),
@@ -121,6 +121,8 @@ class ProfileView extends GetView<ProfileController> {
                         _buildInfoRow('NISN', user.nisn ?? '-'),
                         const Divider(height: 20),
                         _buildInfoRow('Kelas', user.kelas ?? '-'),
+                        const Divider(height: 20),
+                        _buildInfoRow('Jurusan', user.jurusan ?? '-'),
                         const Divider(height: 20),
                         _buildInfoRow('Sekolah', user.sekolah ?? '-'),
                       ],
@@ -142,7 +144,7 @@ class ProfileView extends GetView<ProfileController> {
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 18,
                       offset: const Offset(0, 12),
                     ),

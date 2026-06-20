@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 
 import 'package:clevora/app/data/services/auth_service.dart';
+import 'package:clevora/app/data/providers/api_provider.dart';
 
 class StudentHomeController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -10,6 +11,7 @@ class StudentHomeController extends GetxController {
   final userName = ''.obs;
   final userRole = ''.obs;
   final searchQuery = ''.obs;
+  final isStatsLoading = false.obs;
 
   final stats = <Map<String, dynamic>>[
     {
@@ -29,6 +31,8 @@ class StudentHomeController extends GetxController {
     },
   ].obs;
 
+  late final Worker _userWorker;
+
   @override
   void onInit() {
     super.onInit();
@@ -36,29 +40,46 @@ class StudentHomeController extends GetxController {
     fetchDashboardStats();
   }
 
+  @override
+  void onClose() {
+    _userWorker.dispose();
+    super.onClose();
+  }
+
   void _bindUserData() {
     final user = _authService.currentUser.value;
     if (user != null) {
       userName.value = user.nama;
-      userRole.value = 'Siswa Kelas ${user.kelas ?? "XI"} · ${user.sekolah ?? "Clevora"}';
+      final String jurusan = (user.jurusan != null && user.jurusan!.isNotEmpty) ? ' ${user.jurusan}' : '';
+      userRole.value = 'Siswa Kelas ${user.kelas ?? "-"} $jurusan · ${user.sekolah ?? "Clevora"}';
     }
 
-    ever(_authService.currentUser, (user) {
+    _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         userName.value = user.nama;
-        userRole.value = 'Siswa Kelas ${user.kelas ?? "XI"} · ${user.sekolah ?? "Clevora"}';
+        final String jurusan = (user.jurusan != null && user.jurusan!.isNotEmpty) ? ' ${user.jurusan}' : '';
+        userRole.value = 'Siswa Kelas ${user.kelas ?? "-"} $jurusan · ${user.sekolah ?? "Clevora"}';
       }
     });
   }
 
   Future<void> fetchDashboardStats() async {
+    isStatsLoading.value = true;
     try {
-      final data = await _authService.getStudentStats();
-      stats[0]['value'] = (data['completedTasksCount'] ?? 0).toString();
-      stats[1]['value'] = (data['averageScore'] ?? 0.0).toString();
-      stats[2]['value'] = (data['rank'] ?? 0).toString();
-      stats.refresh();
-    } catch (_) {}
+      final res = await Get.find<ApiProvider>().dio.get('/dashboard/student');
+      if (res.statusCode == 200) {
+        final data = res.data['data'] ?? {};
+        stats[0]['value'] = (data['tugas_selesai'] ?? 0).toString();
+        stats[1]['value'] = (data['rata_rata_nilai'] ?? 0.0).toString();
+        stats[2]['value'] = (data['peringkat'] ?? 0).toString();
+        stats.refresh();
+      }
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal memuat statistik: $e',
+        snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isStatsLoading.value = false;
+    }
   }
 
   final menuItems = <Map<String, dynamic>>[

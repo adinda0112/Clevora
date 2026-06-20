@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/theme/app_theme.dart';
+import 'package:clevora/app/routes/app_routes.dart';
 
 import 'package:clevora/app/data/services/auth_service.dart';
+import 'package:clevora/app/data/providers/api_provider.dart';
 
 class TeacherHomeController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -10,30 +12,51 @@ class TeacherHomeController extends GetxController {
   final userName = ''.obs;
   final userRole = ''.obs;
   final searchQuery = ''.obs;
+  final isStatsLoading = false.obs;
 
   final stats = <Map<String, dynamic>>[
     {
-      'title': 'Modul Ajar',
+      'title': 'ATP',
       'value': '0',
       'color': AppColors.primaryPurple,
+      'route': Routes.TEACHER_HISTORY,
+      'args': {'type': 'ATP'},
     },
     {
-      'title': 'Kuis Aktif',
+      'title': 'Modul Ajar',
       'value': '0',
       'color': AppColors.teal,
+      'route': Routes.TEACHER_HISTORY,
+      'args': {'type': 'Modul'},
     },
     {
-      'title': 'Siswa',
+      'title': 'Materi',
       'value': '0',
       'color': AppColors.amber,
+      'route': Routes.TEACHER_HISTORY,
+      'args': {'type': 'Materi'},
+    },
+    {
+      'title': 'Kuis',
+      'value': '0',
+      'color': AppColors.red,
+      'route': Routes.QUIZ_MANAGEMENT,
     },
   ].obs;
+
+  late final Worker _userWorker;
 
   @override
   void onInit() {
     super.onInit();
     _bindUserData();
     fetchDashboardStats();
+  }
+
+  @override
+  void onClose() {
+    _userWorker.dispose();
+    super.onClose();
   }
 
   void _bindUserData() {
@@ -43,7 +66,7 @@ class TeacherHomeController extends GetxController {
       userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
     }
 
-    ever(_authService.currentUser, (user) {
+    _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         userName.value = user.nama;
         userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
@@ -52,36 +75,54 @@ class TeacherHomeController extends GetxController {
   }
 
   Future<void> fetchDashboardStats() async {
+    isStatsLoading.value = true;
     try {
-      final data = await _authService.getTeacherStats();
-      stats[0]['value'] = (data['activeModulesCount'] ?? 0).toString();
-      stats[1]['value'] = (data['activeQuizzesCount'] ?? 0).toString();
-      stats[2]['value'] = (data['studentsCount'] ?? 0).toString();
-      stats.refresh();
-    } catch (_) {}
+      final res = await Get.find<ApiProvider>().dio.get('/dashboard/teacher');
+      if (res.statusCode == 200) {
+        final data = res.data['data'] ?? {};
+        stats[0]['value'] = (data['atpCount'] ?? 0).toString();
+        stats[1]['value'] = (data['modulCount'] ?? 0).toString();
+        stats[2]['value'] = (data['materiCount'] ?? 0).toString();
+        stats[3]['value'] = (data['kuisCount'] ?? 0).toString();
+        stats.refresh();
+
+        if (data['recentActivities'] != null) {
+          final List<dynamic> recent = data['recentActivities'];
+          if (recent.isNotEmpty) {
+            activities.value = recent.map((item) {
+              final isModule = item['type'] == 'module';
+              return {
+                'title': item['title'] ?? 'Tanpa Judul',
+                'subtitle': item['subtitle'] ?? '',
+                'status': isModule ? 'Aktif' : 'Tersedia',
+                'icon': isModule ? Icons.description_outlined : Icons.assignment_turned_in_outlined,
+                'color': isModule ? AppColors.primaryPurple : AppColors.teal,
+                'bg': isModule ? AppColors.lightPurple : AppColors.lightTeal,
+                'statusColor': isModule ? const Color(0xFF3B6D11) : const Color(0xFF633806),
+                'statusBg': isModule ? const Color(0xFFEAF3DE) : AppColors.lightAmber,
+              };
+            }).toList();
+          } else {
+            activities.clear();
+          }
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal memuat statistik dashboard: $e',
+        snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isStatsLoading.value = false;
+    }
   }
 
   final menuItems = <Map<String, dynamic>>[
     {
-      'title': 'ATP & Modul Ajar',
-      'subtitle': 'Generate otomatis',
-      'icon': Icons.description_outlined,
+      'title': 'Absen Siswa',
+      'subtitle': 'Kehadiran harian',
+      'icon': Icons.co_present_outlined,
       'bg': AppColors.lightPurple,
       'text': AppColors.darkPurple,
-    },
-    {
-      'title': 'Bank Materi',
-      'subtitle': 'Konten pembelajaran',
-      'icon': Icons.auto_stories_outlined,
-      'bg': AppColors.lightTeal,
-      'text': const Color(0xFF085041),
-    },
-    {
-      'title': 'Kelola Kuis',
-      'subtitle': 'Pretest · Postest · Ujian',
-      'icon': Icons.assignment_turned_in_outlined,
-      'bg': AppColors.lightAmber,
-      'text': const Color(0xFF633806),
+      'route': Routes.ATTENDANCE,
     },
     {
       'title': 'Laporan Nilai',
@@ -89,6 +130,7 @@ class TeacherHomeController extends GetxController {
       'icon': Icons.bar_chart_outlined,
       'bg': AppColors.lightCoral,
       'text': const Color(0xFF711b13),
+      'route': Routes.REPORT,
     },
   ].obs;
 

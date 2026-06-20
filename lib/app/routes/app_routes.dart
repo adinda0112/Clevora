@@ -1,15 +1,21 @@
+// ignore_for_file: constant_identifier_names, deprecated_member_use
 abstract class Routes {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const COMPLETE_PROFILE = '/complete-profile';
   static const OTP = '/otp';
   
   static const TEACHER_MAIN = '/teacher-main';
   static const TEACHER_HOME = '/teacher-home';
   static const QUIZ_MANAGEMENT = '/quiz-management';
+  static const MANUAL_QUIZ_QUESTIONS = '/manual-quiz-questions';
   static const REPORT = '/report';
   static const PROFILE = '/profile';
   static const EDIT_PROFILE = '/edit-profile';
+  static const ATTENDANCE = '/attendance';
+  static const ATTENDANCE_HISTORY = '/attendance-history';
+  static const TEACHER_HISTORY = '/teacher-history';
   
   static const MODULE_AI = '/module-ai';
   static const GENERATE_FORM = '/generate-form';

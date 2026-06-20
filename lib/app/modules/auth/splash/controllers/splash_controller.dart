@@ -1,21 +1,16 @@
 import 'package:get/get.dart';
+import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 
-import 'package:clevora/app/data/services/auth_service.dart';
-
 class SplashController extends GetxController {
+  final AuthService _authService = Get.find<AuthService>();
+
   @override
   void onInit() {
     super.onInit();
-    _checkAutoLogin();
-  }
-
-  void _checkAutoLogin() async {
-    await Future.delayed(const Duration(milliseconds: 1500));
-    final authService = Get.find<AuthService>();
-    if (authService.token.isNotEmpty) {
-      await authService.autoLogin();
-    }
+    Future.delayed(const Duration(seconds: 3), () {
+      _authService.autoLogin();
+    });
   }
 
   void goToLogin() {

@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 import 'package:clevora/app/modules/shared/edit_profile/controllers/edit_profile_controller.dart';
 
 class EditProfileView extends GetView<EditProfileController> {
-  EditProfileView({super.key});
-
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
+  const EditProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    nameController.text = controller.fullName.value;
-    emailController.text = controller.email.value;
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
 
@@ -35,39 +31,57 @@ class EditProfileView extends GetView<EditProfileController> {
           children: [
             // FOTO PROFILE
             Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEEF2FF),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Color(0xFF7F77DD),
-                    ),
-                  ),
-
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF7F77DD),
-                        shape: BoxShape.circle,
+              child: GestureDetector(
+                onTap: controller.pickImage,
+                child: Stack(
+                  children: [
+                    Obx(() {
+                      final imagePath = controller.profileImagePath.value;
+                      if (imagePath.isNotEmpty) {
+                        return Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: FileImage(File(imagePath)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      }
+                      return Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEF2FF),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Color(0xFF7F77DD),
+                        ),
+                      );
+                    }),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF7F77DD),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 18,
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
@@ -85,7 +99,7 @@ class EditProfileView extends GetView<EditProfileController> {
             const SizedBox(height: 8),
 
             TextField(
-              controller: nameController,
+              controller: controller.namaController,
 
               decoration: InputDecoration(
                 hintText: 'Masukkan nama',
@@ -114,7 +128,7 @@ class EditProfileView extends GetView<EditProfileController> {
             const SizedBox(height: 8),
 
             TextField(
-              controller: emailController,
+              controller: controller.emailController,
 
               decoration: InputDecoration(
                 hintText: 'Masukkan email',
@@ -136,34 +150,31 @@ class EditProfileView extends GetView<EditProfileController> {
               width: double.infinity,
               height: 55,
 
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7F77DD),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+              child: Obx(
+                () => ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7F77DD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                ),
-
-                onPressed: () {
-                  controller.fullName.value = nameController.text;
-                  controller.email.value = emailController.text;
-
-                  Get.snackbar(
-                    'Berhasil',
-                    'Profile berhasil diperbarui',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-
-                  Get.back();
-                },
-
-                child: const Text(
-                  'Simpan Perubahan',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  onPressed: controller.isLoading.value ? null : controller.saveProfile,
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Simpan Perubahan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ),

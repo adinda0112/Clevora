@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/student/learning/controllers/learning_controller.dart';
 import 'package:clevora/app/data/models/module_model.dart';
+import 'package:clevora/app/modules/student/student_main/controllers/student_main_controller.dart';
 
 class LearningView extends GetView<LearningController> {
   const LearningView({super.key});
@@ -20,6 +21,16 @@ class LearningView extends GetView<LearningController> {
         backgroundColor: AppColors.darkPurple,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (Get.isRegistered<StudentMainController>()) {
+              Get.find<StudentMainController>().changePage(0);
+            } else {
+              Get.back();
+            }
+          },
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.fetchModules(),
@@ -104,7 +115,7 @@ class LearningView extends GetView<LearningController> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -211,71 +222,86 @@ class LearningView extends GetView<LearningController> {
   }
 
   void _openModuleReader(BuildContext context, ModuleModel module) {
+    Get.to(
+      const ModuleReaderPage(),
+      arguments: module,
+      transition: Transition.rightToLeft,
+    );
+  }
+}
+
+class ModuleReaderPage extends StatelessWidget {
+  const ModuleReaderPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final ModuleModel module = Get.arguments as ModuleModel;
     final date = module.createdAt;
     final formattedDate = date != null
         ? '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}'
         : '-';
 
-    Get.to(
-      () => Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text(
-            module.judul,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: AppColors.darkPurple,
-          iconTheme: const IconThemeData(color: Colors.white),
-          elevation: 0,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          module.judul,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                module.judul,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.grey900,
-                ),
-              ),
-              const Gap(8),
-              Row(
-                children: [
-                  const Icon(Icons.person, size: 14, color: AppColors.grey600),
-                  const Gap(4),
-                  Text(
-                    module.guru?.nama ?? 'Guru Pengajar',
-                    style: const TextStyle(fontSize: 13, color: AppColors.grey600),
-                  ),
-                  const Gap(12),
-                  const Icon(Icons.calendar_today, size: 12, color: AppColors.grey600),
-                  const Gap(4),
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(fontSize: 13, color: AppColors.grey600),
-                  ),
-                ],
-              ),
-              const Gap(16),
-              const Divider(),
-              const Gap(16),
-              Text(
-                module.konten,
-                style: const TextStyle(
-                  fontSize: 15,
-                  height: 1.6,
-                  color: Color(0xFF374151),
-                ),
-              ),
-              const Gap(32),
-            ],
-          ),
+        backgroundColor: AppColors.darkPurple,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
         ),
       ),
-      transition: Transition.rightToLeft,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              module.judul,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.grey900,
+              ),
+            ),
+            const Gap(8),
+            Row(
+              children: [
+                const Icon(Icons.person, size: 14, color: AppColors.grey600),
+                const Gap(4),
+                Text(
+                  module.guru?.nama ?? 'Guru Pengajar',
+                  style: const TextStyle(fontSize: 13, color: AppColors.grey600),
+                ),
+                const Gap(12),
+                const Icon(Icons.calendar_today, size: 12, color: AppColors.grey600),
+                const Gap(4),
+                Text(
+                  formattedDate,
+                  style: const TextStyle(fontSize: 13, color: AppColors.grey600),
+                ),
+              ],
+            ),
+            const Gap(16),
+            const Divider(),
+            const Gap(16),
+            Text(
+              module.konten,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.6,
+                color: Color(0xFF374151),
+              ),
+            ),
+            const Gap(32),
+          ],
+        ),
+      ),
     );
   }
 }

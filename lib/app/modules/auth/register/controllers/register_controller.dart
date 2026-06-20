@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 
@@ -12,20 +11,28 @@ class RegisterController extends GetxController {
   final isLoading = false.obs;
   final passwordStrength = 0.0.obs;
 
+  final formKey = GlobalKey<FormState>();
+
   late final TextEditingController namaController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   late final TextEditingController confirmPasswordController;
   late final TextEditingController nipController;
   late final TextEditingController nisnController;
-  late final TextEditingController kelasController;
   late final TextEditingController sekolahController;
 
-  final selectedMapel = 'Informatika'.obs;
-  final mapelOptions = ['Informatika', 'Matematika', 'Bahasa Inggris', 'Fisika'];
+  final selectedKelas = 'X'.obs;
+  final kelasOptions = ['X', 'XI', 'XII'];
 
-  final selectedJenjang = 'SMA'.obs;
-  final jenjangOptions = ['SD', 'SMP', 'SMA', 'SMK'];
+  final selectedMapel = <String>[].obs;
+  final mapelOptions = [
+    'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi', 
+    'Biologi', 'Fisika', 'Sejarah', 'PJOK', 'Prakarya dan Kewirausahaan', 
+    'Pendidikan Agama Islam', 'Seni Budaya', 'Bahasa Jawa', 'Kimia'
+  ];
+
+  final selectedJurusan = 'IPA'.obs;
+  final jurusanOptions = ['IPA', 'IPS'];
 
   final AuthService _authService = Get.find<AuthService>();
 
@@ -38,20 +45,18 @@ class RegisterController extends GetxController {
     confirmPasswordController = TextEditingController();
     nipController = TextEditingController();
     nisnController = TextEditingController();
-    kelasController = TextEditingController();
     sekolahController = TextEditingController();
   }
 
   @override
   void onClose() {
-    namaController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    nipController.dispose();
-    nisnController.dispose();
-    kelasController.dispose();
-    sekolahController.dispose();
+    // namaController.dispose();
+    // emailController.dispose();
+    // passwordController.dispose();
+    // confirmPasswordController.dispose();
+    // nipController.dispose();
+    // nisnController.dispose();
+    // sekolahController.dispose();
     super.onClose();
   }
 
@@ -71,7 +76,9 @@ class RegisterController extends GetxController {
     if (currentStep.value == 0) {
       currentStep.value = 1;
     } else {
-      register();
+      if (formKey.currentState?.validate() ?? false) {
+        register();
+      }
     }
   }
 
@@ -85,124 +92,13 @@ class RegisterController extends GetxController {
     final nama = namaController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    final confirmPass = confirmPasswordController.text.trim();
     final role = selectedRole.value;
     final nip = role == 'guru' ? nipController.text.trim() : null;
     final nisn = role == 'siswa' ? nisnController.text.trim() : null;
-    final kelas = role == 'siswa' ? kelasController.text.trim() : null;
-    final sekolah = role == 'siswa' ? sekolahController.text.trim() : null;
-    final mapel = selectedMapel.value;
-    final jenjang = selectedJenjang.value;
-
-    if (nama.isEmpty) {
-      Get.snackbar(
-        "Peringatan",
-        "Nama lengkap tidak boleh kosong",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (email.isEmpty) {
-      Get.snackbar(
-        "Peringatan",
-        "Email tidak boleh kosong",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (!EmailValidator.validate(email)) {
-      Get.snackbar(
-        "Peringatan",
-        "Format email tidak valid",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (role == 'guru' && (nip == null || nip.isEmpty)) {
-      Get.snackbar(
-        "Peringatan",
-        "NIP tidak boleh kosong untuk guru",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (role == 'siswa') {
-      if (nisn == null || nisn.isEmpty) {
-        Get.snackbar(
-          "Peringatan",
-          "NISN tidak boleh kosong untuk siswa",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.amber.shade100,
-          colorText: Colors.black87,
-        );
-        return;
-      }
-      if (kelas == null || kelas.isEmpty) {
-        Get.snackbar(
-          "Peringatan",
-          "Kelas tidak boleh kosong untuk siswa",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.amber.shade100,
-          colorText: Colors.black87,
-        );
-        return;
-      }
-      if (sekolah == null || sekolah.isEmpty) {
-        Get.snackbar(
-          "Peringatan",
-          "Sekolah tidak boleh kosong untuk siswa",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.amber.shade100,
-          colorText: Colors.black87,
-        );
-        return;
-      }
-    }
-
-    if (password.isEmpty) {
-      Get.snackbar(
-        "Peringatan",
-        "Password tidak boleh kosong",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (password.length < 8) {
-      Get.snackbar(
-        "Peringatan",
-        "Password minimal harus 8 karakter",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    if (password != confirmPass) {
-      Get.snackbar(
-        "Peringatan",
-        "Konfirmasi password tidak sesuai",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade100,
-        colorText: Colors.black87,
-      );
-      return;
-    }
+    final kelas = role == 'siswa' ? selectedKelas.value : null;
+    final sekolah = sekolahController.text.trim();
+    final mapel = role == 'guru' ? selectedMapel.join(', ') : null;
+    final jurusan = role == 'siswa' ? selectedJurusan.value : null;
 
     try {
       isLoading.value = true;
@@ -216,7 +112,7 @@ class RegisterController extends GetxController {
         kelas: kelas,
         sekolah: sekolah,
         mapel: mapel,
-        jenjang: jenjang,
+        jurusan: jurusan,
       );
 
       if (success) {
@@ -238,13 +134,17 @@ class RegisterController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "Registrasi Gagal",
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
-      );
+      final msg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception:', '');
+      debugPrint("REGISTER ERROR: $msg");
+      try {
+        Get.snackbar(
+          "Registrasi Gagal",
+          msg,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+        );
+      } catch (_) {}
     } finally {
       isLoading.value = false;
     }

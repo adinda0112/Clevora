@@ -9,6 +9,7 @@ class ModuleModel {
   final String? mapel;
   final String? jenjang;
   final String? kelas;
+  final String? jenis;
   final DateTime? createdAt;
 
   ModuleModel({
@@ -20,6 +21,7 @@ class ModuleModel {
     this.mapel,
     this.jenjang,
     this.kelas,
+    this.jenis,
     this.createdAt,
   });
 
@@ -35,6 +37,7 @@ class ModuleModel {
       mapel: json['mapel'],
       jenjang: json['jenjang'],
       kelas: json['kelas'],
+      jenis: json['jenis'],
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
     );
   }
@@ -49,6 +52,7 @@ class ModuleModel {
       'mapel': mapel,
       'jenjang': jenjang,
       'kelas': kelas,
+      'jenis': jenis,
       'createdAt': createdAt?.toIso8601String(),
     };
   }

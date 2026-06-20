@@ -6,7 +6,7 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/widgets/menu_card.dart';
 import 'package:clevora/app/widgets/stat_card.dart';
 import 'package:clevora/app/modules/teacher/dashboard/controllers/teacher_home_controller.dart';
-import 'package:clevora/app/routes/app_routes.dart';
+
 
 class TeacherHomeView extends GetView<TeacherHomeController> {
   const TeacherHomeView({super.key});
@@ -51,33 +51,13 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                   () => Text(
                     controller.userRole.value,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
                 const Gap(16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search, color: Colors.white70, size: 18),
-                      const Gap(8),
-                      Text(
-                        'Cari modul, materi, kuis...',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -97,10 +77,17 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                         return Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: StatCard(
-                              title: stat['title'],
-                              value: stat['value'],
-                              color: stat['color'],
+                            child: GestureDetector(
+                              onTap: () {
+                                if (stat['route'] != null) {
+                                  Get.toNamed(stat['route'], arguments: stat['args']);
+                                }
+                              },
+                              child: StatCard(
+                                title: stat['title'],
+                                value: stat['value'],
+                                color: stat['color'],
+                              ),
                             ),
                           ),
                         );
@@ -139,12 +126,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           backgroundColor: item['bg'],
                           textColor: item['text'],
                           onTap: () {
-                            if (index == 0) {
-                              Get.toNamed(Routes.MODULE_AI);
-                            } else if (index == 2) {
-                              Get.toNamed(Routes.QUIZ_MANAGEMENT);
-                            } else if (index == 3) {
-                              Get.toNamed(Routes.REPORT);
+                            if (item['route'] != null) {
+                              Get.toNamed(item['route']);
                             } else {
                               Get.snackbar(
                                 'Informasi',
@@ -234,6 +217,35 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           ),
                         );
                       }).toList(),
+                    ),
+                  ),
+                  const Gap(24),
+                  const Text(
+                    'Jelajah Video',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.grey900,
+                    ),
+                  ),
+                  const Gap(12),
+                  // Video Section Placeholder
+                  Container(
+                    width: double.infinity,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(12),
+                      image: const DecorationImage(
+                        image: NetworkImage('https://via.placeholder.com/600x400/000000/FFFFFF/?text=Video+Hasil+Bigdata'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const Icon(Icons.play_circle_fill, color: Colors.white, size: 60),
+                      ],
                     ),
                   ),
                 ],

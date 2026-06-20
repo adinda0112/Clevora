@@ -8,7 +8,11 @@ import 'app/theme/app_theme.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
-
+import 'package:clevora/app/data/services/face_service.dart';
+import 'package:clevora/app/data/services/attendance_service.dart';
+import 'package:clevora/app/data/services/hasil_service.dart';
+import 'package:clevora/app/data/providers/api_provider.dart';
+import 'package:clevora/app/data/repositories/auth_repository.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
@@ -22,9 +26,14 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
   
+  Get.put(ApiProvider(), permanent: true);
+  Get.put(AuthRepository(Get.find<ApiProvider>()), permanent: true);
   Get.put(AuthService(), permanent: true);
   Get.lazyPut(() => ModuleService(), fenix: true);
   Get.lazyPut(() => QuizService(), fenix: true);
+  Get.lazyPut(() => FaceService(), fenix: true);
+  Get.lazyPut(() => AttendanceService(), fenix: true);
+  Get.lazyPut(() => HasilService(), fenix: true);
   runApp(const ClevoraApp());
 }
 

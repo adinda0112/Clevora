@@ -6,7 +6,6 @@ import 'package:clevora/app/modules/student/student_main/controllers/student_mai
 import 'package:clevora/app/modules/student/dashboard/views/student_home_view.dart';
 import 'package:clevora/app/modules/student/learning/views/learning_view.dart';
 import 'package:clevora/app/modules/student/student_quiz/views/student_quiz_view.dart';
-import 'package:clevora/app/modules/student/student_result/views/student_result_view.dart';
 import 'package:clevora/app/modules/shared/profile/views/profile_view.dart';
 
 class StudentMainView extends GetView<StudentMainController> {
@@ -18,7 +17,6 @@ class StudentMainView extends GetView<StudentMainController> {
       const StudentHomeView(),
       const LearningView(),
       const StudentQuizView(),
-      const StudentResultView(),
       const ProfileView(),
     ];
 
