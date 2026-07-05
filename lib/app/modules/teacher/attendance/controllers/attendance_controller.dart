@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/attendance_service.dart';
@@ -20,6 +22,17 @@ class AttendanceController extends GetxController {
 
   final siswaList = <Map<String, dynamic>>[].obs;
 
+  // --- QR Dynamic ---
+  final qrToken = ''.obs;
+  final qrCountdown = 0.obs;
+  final isQrActive = false.obs;
+  Timer? _qrTimer;
+  Timer? _countdownTimer;
+
+  // --- Real-time Socket ---
+  final liveAttendanceCount = 0.obs;
+  final liveAttendanceList = <Map<String, dynamic>>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -28,6 +41,13 @@ class AttendanceController extends GetxController {
       'X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPA 2',
       'X IPS 1', 'X IPS 2', 'XI IPS 1', 'XI IPS 2', 'XII IPS 1', 'XII IPS 2',
     ];
+  }
+
+  @override
+  void onClose() {
+    stopQrSession();
+    _attendanceService.disconnectSocket();
+    super.onClose();
   }
 
   void _loadTeacherData() {
@@ -145,6 +165,70 @@ class AttendanceController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  // === QR Dynamic (JWT 30s) ===
+  Future<void> startQrSession() async {
+    if (selectedKelas.value.isEmpty || selectedMapel.value.isEmpty) return;
+
+    isQrActive.value = true;
+    liveAttendanceCount.value = 0;
+    liveAttendanceList.clear();
+
+    // Connect Socket.io for real-time updates
+    _attendanceService.initSocket(selectedKelas.value, (data) {
+      liveAttendanceCount.value++;
+      if (data is Map<String, dynamic>) {
+        final nama = data['siswa']?['nama'] ?? 'Siswa';
+        liveAttendanceList.add({'nama': nama, 'waktu': DateTime.now().toString()});
+      }
+    });
+
+    await _generateNewQr();
+
+    // Auto-refresh QR every 30 seconds
+    _qrTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+      if (isQrActive.value) {
+        await _generateNewQr();
+      }
+    });
+  }
+
+  Future<void> _generateNewQr() async {
+    try {
+      final token = await _attendanceService.generateQr(
+        kelas: selectedKelas.value,
+        mapel: selectedMapel.value,
+        tanggal: '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}',
+      );
+      qrToken.value = token;
+      qrCountdown.value = 30;
+
+      _countdownTimer?.cancel();
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (qrCountdown.value > 0) {
+          qrCountdown.value--;
+        } else {
+          timer.cancel();
+        }
+      });
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal membuat QR: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900);
+    }
+  }
+
+  void stopQrSession() {
+    isQrActive.value = false;
+    _qrTimer?.cancel();
+    _qrTimer = null;
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    qrToken.value = '';
+    qrCountdown.value = 0;
+    _attendanceService.disconnectSocket();
   }
 
   bool _isSameDate(DateTime a, DateTime b) {

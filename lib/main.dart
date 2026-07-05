@@ -12,6 +12,7 @@ import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/data/services/face_service.dart';
 import 'package:clevora/app/data/services/attendance_service.dart';
 import 'package:clevora/app/data/services/hasil_service.dart';
+import 'package:clevora/app/data/services/profil_service.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 import 'package:clevora/app/data/repositories/auth_repository.dart';
 void main() async {
@@ -35,15 +36,15 @@ void main() async {
   Get.lazyPut(() => FaceService(), fenix: true);
   Get.lazyPut(() => AttendanceService(), fenix: true);
   Get.lazyPut(() => HasilService(), fenix: true);
+  Get.lazyPut(() => ProfilService(), fenix: true);
   runApp(ClevoraApp(initialRoute: getInitialRoute()));
 }
 
 String getInitialRoute() {
   final storage = GetStorage();
-  final token = storage.read('token');
   final userMap = storage.read('user');
 
-  if (token == null || token.toString().isEmpty || userMap == null) {
+  if (userMap == null) {
     return AppPages.INITIAL; // Which is Routes.SPLASH
   }
 

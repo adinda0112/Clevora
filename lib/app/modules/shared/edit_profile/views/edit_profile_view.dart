@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:io';
+import 'dart:convert';
 import 'package:clevora/app/modules/shared/edit_profile/controllers/edit_profile_controller.dart';
 
 class EditProfileView extends GetView<EditProfileController> {
@@ -37,6 +38,8 @@ class EditProfileView extends GetView<EditProfileController> {
                   children: [
                     Obx(() {
                       final imagePath = controller.profileImagePath.value;
+                      final base64String = controller.fotoProfilBase64.value;
+                      
                       if (imagePath.isNotEmpty) {
                         return Container(
                           width: 110,
@@ -49,12 +52,24 @@ class EditProfileView extends GetView<EditProfileController> {
                             ),
                           ),
                         );
+                      } else if (base64String.isNotEmpty) {
+                        return Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: MemoryImage(base64Decode(base64String)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
                       }
                       return Container(
                         width: 110,
                         height: 110,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEEF2FF),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -140,6 +155,77 @@ class EditProfileView extends GetView<EditProfileController> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Form Content based on Role
+            Form(
+              key: controller.formKey,
+              child: Column(
+                children: [
+                  if (controller.userRole == 'guru') ...[
+                    const Align(alignment: Alignment.centerLeft, child: Text('NIP', style: TextStyle(fontWeight: FontWeight.w600))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: controller.nipController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan 18 digit NIP',
+                        filled: true, fillColor: Colors.white,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty && value.length != 18) return 'NIP harus 18 digit';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    const Align(alignment: Alignment.centerLeft, child: Text('Asal Sekolah', style: TextStyle(fontWeight: FontWeight.w600))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: controller.sekolahController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan Asal Sekolah',
+                        filled: true, fillColor: Colors.white,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Align(alignment: Alignment.centerLeft, child: Text('Mata Pelajaran', style: TextStyle(fontWeight: FontWeight.w600))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: controller.mapelController,
+                      decoration: InputDecoration(
+                        hintText: 'Mata Pelajaran (Contoh: Informatika)',
+                        filled: true, fillColor: Colors.white,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ] else ...[
+                    const Align(alignment: Alignment.centerLeft, child: Text('NISN', style: TextStyle(fontWeight: FontWeight.w600))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: controller.nisnController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan NISN',
+                        filled: true, fillColor: Colors.white,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Align(alignment: Alignment.centerLeft, child: Text('Asal Sekolah', style: TextStyle(fontWeight: FontWeight.w600))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: controller.sekolahController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan Asal Sekolah',
+                        filled: true, fillColor: Colors.white,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
 

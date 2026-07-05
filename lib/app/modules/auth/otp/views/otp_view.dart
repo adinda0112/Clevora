@@ -10,8 +10,10 @@ class OtpView extends GetView<OtpController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Get.back(),
@@ -184,6 +186,7 @@ class OtpView extends GetView<OtpController> {
           ),
         );
       }),
+    ),
     );
   }
 

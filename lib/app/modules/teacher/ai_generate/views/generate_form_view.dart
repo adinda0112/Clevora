@@ -39,12 +39,7 @@ class GenerateFormView extends GetView<GenerateFormController> {
               () => DropdownButtonFormField<String>(
                 value: controller.mataPelajaran.value.isEmpty ? null : controller.mataPelajaran.value,
                 decoration: _inputDecoration().copyWith(hintText: 'Pilih Mata Pelajaran'),
-                items: [
-                  'Bahasa Indonesia', 'Bahasa Inggris', 'Matematika', 
-                  'Informatika', 'Fisika', 'Kimia', 'Biologi', 
-                  'Sejarah', 'Geografi', 'Ekonomi', 'Sosiologi', 
-                  'Pendidikan Pancasila', 'Seni Budaya', 'PJOK', 'Prakarya'
-                ].map((String val) {
+                items: controller.mapelOptions.map((String val) {
                   return DropdownMenuItem(value: val, child: Text(val));
                 }).toList(),
                 onChanged: (val) {

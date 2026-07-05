@@ -64,6 +64,8 @@ import 'package:clevora/app/modules/shared/edit_profile/views/edit_profile_view.
 import 'package:clevora/app/modules/shared/edit_profile/bindings/edit_profile_binding.dart';
 import 'package:clevora/app/modules/shared/profile/views/security_log_view.dart';
 import 'package:clevora/app/modules/shared/profile/bindings/security_log_binding.dart';
+import 'package:clevora/app/modules/shared/video_player/bindings/video_player_binding.dart';
+import 'package:clevora/app/modules/shared/video_player/views/video_player_view.dart';
 
 class AppPages {
   static const INITIAL = Routes.SPLASH;
@@ -101,6 +103,7 @@ class AppPages {
     GetPage(name: Routes.STUDENT_EXAM, page: () => const StudentExamView(), binding: StudentExamBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.STUDENT_RESULT, page: () => const StudentResultView(), binding: StudentResultBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.STUDENT_QR_SCANNER, page: () => const StudentQrScannerView(), binding: StudentQrScannerBinding(), transition: Transition.fadeIn),
+    GetPage(name: Routes.VIDEO_PLAYER, page: () => const VideoPlayerView(), binding: VideoPlayerBinding(), transition: Transition.rightToLeft),
     
     // Shared
     GetPage(name: Routes.PROFILE, page: () => const ProfileView(), binding: ProfileBinding(), transition: Transition.rightToLeft),

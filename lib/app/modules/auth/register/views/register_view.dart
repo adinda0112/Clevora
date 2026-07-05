@@ -10,13 +10,29 @@ class RegisterView extends GetView<RegisterController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (controller.currentStep.value > 0) {
+          controller.prevStep();
+        } else {
+          Get.back();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (controller.currentStep.value > 0) {
+                controller.prevStep();
+              } else {
+                Get.back();
+              }
+            },
+          ),
         ),
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -104,6 +120,7 @@ class RegisterView extends GetView<RegisterController> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

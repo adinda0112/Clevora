@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gap/gap.dart';
+import 'dart:convert';
 
 import 'package:clevora/app/modules/shared/profile/controllers/profile_controller.dart';
 
@@ -36,19 +37,35 @@ class ProfileView extends GetView<ProfileController> {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEEF2FF),
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 42,
-                      color: Color(0xFF7F77DD),
-                    ),
-                  ),
+                  Obx(() {
+                    final user = controller.currentUser.value;
+                    if (user != null && user.fotoProfilBase64 != null && user.fotoProfilBase64!.isNotEmpty) {
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22),
+                          image: DecorationImage(
+                            image: MemoryImage(base64Decode(user.fotoProfilBase64!)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    }
+                    return Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEEF2FF),
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        size: 42,
+                        color: Color(0xFF7F77DD),
+                      ),
+                    );
+                  }),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -158,19 +175,26 @@ class ProfileView extends GetView<ProfileController> {
                             children: [
                               ListTile(
                                 onTap: () {
-                                  if (item['route'] != null && item['route'].toString().isNotEmpty) {
+                                  if (item['action'] != null) {
+                                    controller.handleSettingAction(item['action']);
+                                  } else if (item['route'] != null && item['route'].toString().isNotEmpty) {
                                     Get.toNamed(item['route']);
                                   }
                                 },
                                 contentPadding: EdgeInsets.zero,
                                 leading: Icon(
                                   item['icon'] as IconData,
-                                  color: const Color(0xFF7F77DD),
+                                  color: item['color'] != null
+                                      ? item['color'] as Color
+                                      : const Color(0xFF7F77DD),
                                 ),
                                 title: Text(
                                   item['title'] as String,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
+                                    color: item['color'] != null
+                                        ? item['color'] as Color
+                                        : null,
                                   ),
                                 ),
                                 trailing: const Icon(
@@ -197,7 +221,20 @@ class ProfileView extends GetView<ProfileController> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () => controller.logout(),
+                  onPressed: () {
+                    Get.defaultDialog(
+                      title: 'Konfirmasi Logout',
+                      middleText: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+                      textConfirm: 'Ya, Keluar',
+                      textCancel: 'Batal',
+                      confirmTextColor: Colors.white,
+                      buttonColor: const Color(0xFFEF4444),
+                      onConfirm: () {
+                        Get.back();
+                        controller.logout();
+                      },
+                    );
+                  },
                   icon: const Icon(Icons.logout, color: Colors.white),
                   label: const Text(
                     'Logout',

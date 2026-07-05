@@ -8,14 +8,9 @@ class AttendanceHistoryController extends GetxController {
   final sessions = <Map<String, dynamic>>[].obs;
   final isLoading = false.obs;
   final selectedKelas = RxString('');
-  final selectedBulan = DateTime.now().month.obs;
-  final selectedTahun = DateTime.now().year.obs;
+  final selectedDate = DateTime.now().obs;
 
   final kelasOptions = <String>[].obs;
-  final bulanOptions = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ];
 
   @override
   void onInit() {
@@ -37,11 +32,18 @@ class AttendanceHistoryController extends GetxController {
     try {
       final data = await _attendanceService.getAttendance(
         kelas: selectedKelas.value,
-        bulan: selectedBulan.value,
-        tahun: selectedTahun.value,
+        bulan: selectedDate.value.month,
+        tahun: selectedDate.value.year,
       );
 
-      final logs = data['logs'] as List<dynamic>? ?? [];
+      final allLogs = data['logs'] as List<dynamic>? ?? [];
+      
+      // Filter logs by the selected exact date
+      final targetDateStr = '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}';
+      final logs = allLogs.where((l) {
+        final date = (l as Map<String, dynamic>)['tanggal']?.toString().substring(0, 10) ?? '';
+        return date == targetDateStr;
+      }).toList();
 
       final grouped = <String, List<Map<String, dynamic>>>{};
       for (final log in logs) {

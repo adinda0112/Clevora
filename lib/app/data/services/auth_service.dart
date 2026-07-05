@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:clevora/app/data/models/user_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 import 'package:clevora/app/data/repositories/auth_repository.dart';
@@ -10,13 +11,24 @@ class AuthService extends GetxService {
   final ApiProvider _apiProvider = Get.find<ApiProvider>();
   final AuthRepository _authRepository = Get.find<AuthRepository>();
   final GetStorage _storage = GetStorage();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   
   final currentUser = Rxn<UserModel>();
   final isAuthenticated = false.obs;
+  final rxToken = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+    _initAuth();
+  }
+
+  Future<void> _initAuth() async {
+    final savedToken = await _secureStorage.read(key: 'token');
+    if (savedToken != null && savedToken.isNotEmpty) {
+      rxToken.value = savedToken;
+    }
+
     final savedUser = _storage.read('user');
     if (savedUser != null) {
       try {
@@ -29,11 +41,12 @@ class AuthService extends GetxService {
     }
   }
 
-  String get token => _storage.read<String>('token') ?? '';
+  String get token => rxToken.value;
 
-  void _saveSession(AuthResponse authResponse) {
+  Future<void> _saveSession(AuthResponse authResponse) async {
     if (authResponse.token != null && authResponse.user != null) {
-      _storage.write('token', authResponse.token);
+      await _secureStorage.write(key: 'token', value: authResponse.token);
+      rxToken.value = authResponse.token!;
       _storage.write('user', authResponse.user!.toJson());
       currentUser.value = authResponse.user;
       isAuthenticated.value = true;
@@ -48,7 +61,7 @@ class AuthService extends GetxService {
     try {
       final response = await _authRepository.login(email, password, role);
       final authResponse = AuthResponse.fromJson(response);
-      _saveSession(authResponse);
+      await _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 403 && e.response?.data?['unverified'] == true) {
@@ -70,7 +83,7 @@ class AuthService extends GetxService {
     try {
       final response = await _authRepository.googleSignIn(idToken, accessToken, role);
       final authResponse = AuthResponse.fromJson(response);
-      _saveSession(authResponse);
+      await _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -129,7 +142,7 @@ class AuthService extends GetxService {
     try {
       final response = await _authRepository.verifyOtp(email, otp);
       final authResponse = AuthResponse.fromJson(response);
-      _saveSession(authResponse);
+      await _saveSession(authResponse);
       return authResponse;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -200,8 +213,14 @@ class AuthService extends GetxService {
     }
   }
 
-  void logout() {
-    _storage.remove('token');
+  Future<void> updateCurrentUserState(UserModel updatedUser) async {
+    await _storage.write('user', updatedUser.toJson());
+    currentUser.value = updatedUser;
+  }
+
+  Future<void> logout() async {
+    await _secureStorage.delete(key: 'token');
+    rxToken.value = '';
     _storage.remove('user');
     currentUser.value = null;
     isAuthenticated.value = false;
@@ -225,7 +244,7 @@ class AuthService extends GetxService {
   }
 
   Future<void> autoLogin() async {
-    final token = _storage.read<String>('token');
+    final token = await _secureStorage.read(key: 'token');
     if (token == null || token.isEmpty) {
       Get.offAllNamed(Routes.LOGIN);
       return;

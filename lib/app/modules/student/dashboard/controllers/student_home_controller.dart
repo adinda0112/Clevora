@@ -10,6 +10,7 @@ class StudentHomeController extends GetxController {
 
   final userName = ''.obs;
   final userRole = ''.obs;
+  final fotoProfilBase64 = ''.obs;
   final searchQuery = ''.obs;
   final isStatsLoading = false.obs;
 
@@ -33,11 +34,15 @@ class StudentHomeController extends GetxController {
 
   late final Worker _userWorker;
 
+  final videos = <dynamic>[].obs;
+  final isVideosLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     _bindUserData();
     fetchDashboardStats();
+    fetchVideos();
   }
 
   @override
@@ -46,12 +51,27 @@ class StudentHomeController extends GetxController {
     super.onClose();
   }
 
+  Future<void> fetchVideos() async {
+    isVideosLoading.value = true;
+    try {
+      final res = await Get.find<ApiProvider>().dio.get('/videos');
+      if (res.statusCode == 200) {
+        videos.value = res.data['data'] ?? [];
+      }
+    } catch (e) {
+      debugPrint('Failed to load videos: $e');
+    } finally {
+      isVideosLoading.value = false;
+    }
+  }
+
   void _bindUserData() {
     final user = _authService.currentUser.value;
     if (user != null) {
       userName.value = user.nama;
       final String jurusan = (user.jurusan != null && user.jurusan!.isNotEmpty) ? ' ${user.jurusan}' : '';
       userRole.value = 'Siswa Kelas ${user.kelas ?? "-"} $jurusan · ${user.sekolah ?? "Clevora"}';
+      fotoProfilBase64.value = user.fotoProfilBase64 ?? '';
     }
 
     _userWorker = ever(_authService.currentUser, (user) {
@@ -59,6 +79,7 @@ class StudentHomeController extends GetxController {
         userName.value = user.nama;
         final String jurusan = (user.jurusan != null && user.jurusan!.isNotEmpty) ? ' ${user.jurusan}' : '';
         userRole.value = 'Siswa Kelas ${user.kelas ?? "-"} $jurusan · ${user.sekolah ?? "Clevora"}';
+        fotoProfilBase64.value = user.fotoProfilBase64 ?? '';
       }
     });
   }

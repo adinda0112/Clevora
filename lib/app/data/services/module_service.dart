@@ -108,7 +108,7 @@ class ModuleService extends GetxService {
   }
 
   // Generate learning materials or quizzes using Gemini AI
-  Future<String> generateAiDevice({
+  Future<Map<String, dynamic>> generateAiDevice({
     required String type,
     required String topik,
     required String kelas,
@@ -150,11 +150,30 @@ class ModuleService extends GetxService {
         ),
       );
       if (response.data != null && response.data['data'] != null && response.data['data']['result'] != null) {
-        return response.data['data']['result'];
+        return {
+          'result': response.data['data']['result'],
+          'kontenId': response.data['data']['kontenId'],
+        };
       }
       throw 'Gagal mendapatkan hasil AI';
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // Update status history AI in Konten DB
+  Future<bool> saveAiHistory(String kontenId, String status, {List<String>? kelasTarget}) async {
+    try {
+      if (status == 'published' && kelasTarget != null && kelasTarget.isNotEmpty) {
+        final response = await _apiProvider.dio.put('/ai/publish/$kontenId', data: {'kelasTarget': kelasTarget});
+        return response.statusCode == 200;
+      } else {
+        final response = await _apiProvider.dio.post('/ai/save', data: {'kontenId': kontenId, 'status': status});
+        return response.statusCode == 200;
+      }
+    } catch (e) {
+      print('Gagal update history AI (Bisa diabaikan jika Modul utama tersimpan): $e');
+      return false;
     }
   }
 }

@@ -146,22 +146,37 @@ class AttendanceHistoryView extends GetView<AttendanceHistoryController> {
           ),
           const Gap(8),
           Expanded(
-            child: Obx(() => DropdownButtonFormField<int>(
-              value: controller.selectedBulan.value,
-              isExpanded: true,
-              items: List.generate(12, (i) => DropdownMenuItem(
-                value: i + 1,
-                child: Text(controller.bulanOptions[i], style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
-              )),
-              onChanged: (val) {
-                if (val != null) {
-                  controller.selectedBulan.value = val;
-                  if (controller.selectedKelas.value.isNotEmpty) controller.loadHistory();
+            child: Obx(() => InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: Get.context!,
+                  initialDate: controller.selectedDate.value,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (picked != null) {
+                  controller.selectedDate.value = picked;
+                  if (controller.selectedKelas.value.isNotEmpty) {
+                    controller.loadHistory();
+                  }
                 }
               },
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                border: OutlineInputBorder(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.grey400),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${controller.selectedDate.value.day}/${controller.selectedDate.value.month}/${controller.selectedDate.value.year}',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    const Icon(Icons.calendar_today, size: 16, color: AppColors.grey600),
+                  ],
+                ),
               ),
             )),
           ),

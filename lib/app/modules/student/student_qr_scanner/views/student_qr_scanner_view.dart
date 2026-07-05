@@ -40,7 +40,9 @@ class StudentQrScannerView extends GetView<StudentQrScannerController> {
                     children: [
                       CircularProgressIndicator(color: AppColors.primaryPurple),
                       Gap(16),
-                      Text('Mencatat Absensi...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('Memverifikasi absensi...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Gap(8),
+                      Text('Memeriksa lokasi & QR...', style: TextStyle(color: Colors.white70, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -77,11 +79,21 @@ class StudentQrScannerView extends GetView<StudentQrScannerController> {
           child: Container(
             color: Colors.black54,
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 24),
-            child: const Text(
-              'Arahkan kamera ke layar guru untuk absen',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            padding: const EdgeInsets.only(top: 24, left: 32, right: 32),
+            child: const Column(
+              children: [
+                Text(
+                  'Arahkan kamera ke QR Code guru',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                Gap(8),
+                Text(
+                  'QR Code berubah setiap 30 detik.\nPastikan Anda berada di area sekolah.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white60, fontSize: 13),
+                ),
+              ],
             ),
           ),
         ),

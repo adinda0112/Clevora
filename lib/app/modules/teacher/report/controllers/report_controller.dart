@@ -12,19 +12,29 @@ class ReportController extends GetxController {
   final selectedMapel = Rxn<String>();
 
   final isLoading = false.obs;
+  final isLoadingClasses = false.obs;
   final allResults = <ResultModel>[].obs;
 
-  final Map<String, List<String>> kelasByJurusan = {
-    'IPA': ['X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPA 2'],
-    'IPS': ['X IPS 1', 'X IPS 2', 'XI IPS 1', 'XI IPS 2', 'XII IPS 1', 'XII IPS 2'],
-  };
-
+  final kelasByJurusan = <String, List<String>>{}.obs;
   final mapelList = <String>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadTeacherMapel();
+    _fetchClasses();
+  }
+
+  Future<void> _fetchClasses() async {
+    isLoadingClasses.value = true;
+    try {
+      final classes = await _hasilService.getClasses();
+      kelasByJurusan.assignAll(classes);
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal memuat daftar kelas: $e');
+    } finally {
+      isLoadingClasses.value = false;
+    }
   }
 
   void _loadTeacherMapel() {

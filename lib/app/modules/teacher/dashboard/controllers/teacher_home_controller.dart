@@ -11,6 +11,7 @@ class TeacherHomeController extends GetxController {
 
   final userName = ''.obs;
   final userRole = ''.obs;
+  final fotoProfilBase64 = ''.obs;
   final searchQuery = ''.obs;
   final isStatsLoading = false.obs;
 
@@ -46,11 +47,15 @@ class TeacherHomeController extends GetxController {
 
   late final Worker _userWorker;
 
+  final videos = <dynamic>[].obs;
+  final isVideosLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     _bindUserData();
     fetchDashboardStats();
+    fetchVideos();
   }
 
   @override
@@ -59,17 +64,33 @@ class TeacherHomeController extends GetxController {
     super.onClose();
   }
 
+  Future<void> fetchVideos() async {
+    isVideosLoading.value = true;
+    try {
+      final res = await Get.find<ApiProvider>().dio.get('/videos');
+      if (res.statusCode == 200) {
+        videos.value = res.data['data'] ?? [];
+      }
+    } catch (e) {
+      debugPrint('Failed to load videos: $e');
+    } finally {
+      isVideosLoading.value = false;
+    }
+  }
+
   void _bindUserData() {
     final user = _authService.currentUser.value;
     if (user != null) {
       userName.value = user.nama;
       userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
+      fotoProfilBase64.value = user.fotoProfilBase64 ?? '';
     }
 
     _userWorker = ever(_authService.currentUser, (user) {
       if (user != null) {
         userName.value = user.nama;
         userRole.value = 'Guru ${user.mapel ?? "Informatika"} · ${user.sekolah ?? user.jenjang ?? "Clevora"}';
+        fotoProfilBase64.value = user.fotoProfilBase64 ?? '';
       }
     });
   }
@@ -134,36 +155,14 @@ class TeacherHomeController extends GetxController {
     },
   ].obs;
 
-  final activities = <Map<String, dynamic>>[
-    {
-      'title': 'Modul Pemrograman Web',
-      'subtitle': 'Kelas X · Diperbarui 2j lalu',
-      'status': 'Aktif',
-      'icon': Icons.description_outlined,
-      'color': AppColors.primaryPurple,
-      'bg': AppColors.lightPurple,
-      'statusColor': const Color(0xFF3B6D11),
-      'statusBg': const Color(0xFFEAF3DE),
-    },
-    {
-      'title': 'Pretest Basis Data',
-      'subtitle': 'Kelas XI · 25 siswa belum',
-      'status': 'Pending',
-      'icon': Icons.assignment_turned_in_outlined,
-      'color': AppColors.teal,
-      'bg': AppColors.lightTeal,
-      'statusColor': const Color(0xFF633806),
-      'statusBg': AppColors.lightAmber,
-    },
-    {
-      'title': 'Ujian Tengah Semester',
-      'subtitle': 'Kelas XII · Nilai rata-rata 82',
-      'status': 'Selesai',
-      'icon': Icons.stars_outlined,
-      'color': AppColors.amber,
-      'bg': AppColors.lightAmber,
-      'statusColor': const Color(0xFF3B6D11),
-      'statusBg': const Color(0xFFEAF3DE),
-    },
-  ].obs;
+  String get initials {
+    if (userName.value.isEmpty) return 'G';
+    final parts = userName.value.trim().split(' ');
+    if (parts.length > 1) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return userName.value.substring(0, 1).toUpperCase();
+  }
+
+  final activities = <Map<String, dynamic>>[].obs;
 }

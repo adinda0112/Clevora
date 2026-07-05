@@ -117,7 +117,7 @@ class StudentQuizView extends GetView<StudentQuizController> {
                             ),
                           ),
                           Text(
-                            'Kelas ${quiz.kelas ?? 'Umum'}',
+                            'Kelas ${quiz.kelas ?? 'Semua'}',
                             style: const TextStyle(
                               color: AppColors.grey600,
                               fontSize: 12,

@@ -10,8 +10,10 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: SingleChildScrollView(
         child: Column(
           children: [
             // Header dengan gradient
@@ -279,8 +281,9 @@ class LoginView extends GetView<LoginController> {
             ),
           ],
         ),
-      ),
-    );
+        ), // End SingleChildScrollView
+      ), // End Scaffold
+    ); // End PopScope
   }
 }
 

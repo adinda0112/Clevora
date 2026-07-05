@@ -22,4 +22,17 @@ class HasilService extends GetxService {
       rethrow;
     }
   }
+
+  Future<Map<String, List<String>>> getClasses() async {
+    try {
+      final response = await _apiProvider.dio.get('/dashboard/classes');
+      if (response.data != null && response.data['data'] != null) {
+        final Map<String, dynamic> data = response.data['data'];
+        return data.map((key, value) => MapEntry(key, List<String>.from(value)));
+      }
+      return {};
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

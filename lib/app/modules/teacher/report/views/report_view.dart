@@ -37,17 +37,27 @@ class ReportView extends GetView<ReportController> {
         children: [
           const Text('Pilih Jurusan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkPurple)),
           const Gap(12),
-          Row(
-            children: [
-              _jurusanCard('IPA'),
-              const Gap(16),
-              _jurusanCard('IPS'),
-            ],
-          ),
+          Obx(() {
+            if (controller.isLoadingClasses.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.kelasByJurusan.isEmpty) {
+              return const Text('Belum ada data kelas tersedia.', style: TextStyle(color: Colors.grey));
+            }
+            
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: controller.kelasByJurusan.keys.map((jurusan) {
+                return _jurusanCard(jurusan);
+              }).toList(),
+            );
+          }),
           const Gap(32),
           Obx(() {
             final jurusan = controller.selectedJurusan.value;
-            if (jurusan == null) return const SizedBox.shrink();
+            if (jurusan == null || !controller.kelasByJurusan.containsKey(jurusan)) return const SizedBox.shrink();
+            
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -73,35 +83,33 @@ class ReportView extends GetView<ReportController> {
   }
 
   Widget _jurusanCard(String title) {
-    return Expanded(
-      child: Obx(() {
-        final isSelected = controller.selectedJurusan.value == title;
-        return GestureDetector(
-          onTap: () => controller.selectJurusan(title),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryPurple : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isSelected ? AppColors.primaryPurple : AppColors.grey200),
-              boxShadow: isSelected
-                  ? [BoxShadow(color: AppColors.primaryPurple.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
-                  : [],
-            ),
-            child: Center(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : AppColors.grey600,
-                ),
-              ),
+    return Obx(() {
+      final isSelected = controller.selectedJurusan.value == title;
+      return GestureDetector(
+        onTap: () => controller.selectJurusan(title),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 100),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryPurple : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isSelected ? AppColors.primaryPurple : AppColors.grey200),
+            boxShadow: isSelected
+                ? [BoxShadow(color: AppColors.primaryPurple.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
+                : [],
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : AppColors.grey600,
             ),
           ),
-        );
-      }),
-    );
+        ),
+      );
+    });
   }
 
   Widget _buildMapelSelection() {

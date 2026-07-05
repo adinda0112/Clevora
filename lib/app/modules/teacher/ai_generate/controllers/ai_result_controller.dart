@@ -28,6 +28,7 @@ class AiResultController extends GetxController {
   final resultText = ''.obs;
   final kelas = ''.obs;
   final mapel = ''.obs;
+  final kontenId = ''.obs;
 
   final isSaving = false.obs;
   final isEditing = false.obs;
@@ -44,9 +45,10 @@ class AiResultController extends GetxController {
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null) {
       generateType.value = args['type'] ?? 'Modul';
-      topik.value = args['topik'] ?? 'Topik Umum';
+      topik.value = args['topik'] ?? 'Topik Semua';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
+      kontenId.value = args['kontenId'] ?? '';
       
       String rawResult = args['result'] ?? '';
       
@@ -200,6 +202,15 @@ class AiResultController extends GetxController {
             kunciJawaban: q.correctIndex,
             penjelasan: q.explanation.isNotEmpty ? q.explanation : null,
           );
+        }
+      }
+
+      // Update AI history if kontenId exists
+      if (kontenId.value.isNotEmpty) {
+        if (shareClass != null) {
+          await _moduleService.saveAiHistory(kontenId.value, 'published', kelasTarget: [shareClass]);
+        } else {
+          await _moduleService.saveAiHistory(kontenId.value, 'draft');
         }
       }
 

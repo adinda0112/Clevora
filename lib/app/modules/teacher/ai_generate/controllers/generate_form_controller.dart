@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:clevora/app/data/services/auth_service.dart';
 
 class GenerateFormController extends GetxController {
   final generateType = ''.obs;
@@ -13,6 +14,13 @@ class GenerateFormController extends GetxController {
   
   final selectedFilePath = ''.obs;
   final selectedFileName = ''.obs;
+
+  final mapelOptions = <String>[
+    'Bahasa Indonesia', 'Bahasa Inggris', 'Matematika', 
+    'Informatika', 'Fisika', 'Kimia', 'Biologi', 
+    'Sejarah', 'Geografi', 'Ekonomi', 'Sosiologi', 
+    'Pendidikan Pancasila', 'Seni Budaya', 'PJOK', 'Prakarya'
+  ].obs;
 
   Future<void> pickFile() async {
     try {
@@ -42,12 +50,26 @@ class GenerateFormController extends GetxController {
     if (args != null) {
       generateType.value = args['type'] ?? 'Modul';
     }
+
+    // Try to get mapel from logged in user
+    try {
+      final authService = Get.find<AuthService>();
+      final user = authService.currentUser.value;
+      if (user != null && user.mapel != null && user.mapel!.isNotEmpty) {
+        if (!mapelOptions.contains(user.mapel!)) {
+          mapelOptions.add(user.mapel!); // Add if not exists
+        }
+        mataPelajaran.value = user.mapel!;
+      }
+    } catch (e) {
+      print('Could not find auth service for mapel');
+    }
   }
 
   void startGenerate() {
     Get.toNamed(Routes.GENERATING_STATE, arguments: {
       'type': generateType.value,
-      'topik': topik.value.isEmpty ? 'Topik Umum' : topik.value,
+      'topik': topik.value.isEmpty ? 'Topik Semua' : topik.value,
       'kelas': kelas.value,
       'mapel': mataPelajaran.value.isEmpty ? 'Informatika' : mataPelajaran.value,
       'tipeKuis': quizType.value,

@@ -31,4 +31,6 @@ abstract class Routes {
   static const STUDENT_EXAM = '/student-exam';
   static const STUDENT_RESULT = '/student-result';
   static const STUDENT_QR_SCANNER = '/student-qr-scanner';
+  
+  static const VIDEO_PLAYER = '/video-player';
 }

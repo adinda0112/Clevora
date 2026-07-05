@@ -23,7 +23,7 @@ class GeneratingStateController extends GetxController {
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null) {
       generateType.value = args['type'] ?? 'Modul';
-      topik.value = args['topik'] ?? 'Topik Umum';
+      topik.value = args['topik'] ?? 'Topik Semua';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
       tipeKuis.value = args['tipeKuis'] ?? 'Latihan';
@@ -55,7 +55,7 @@ class GeneratingStateController extends GetxController {
       statusText.value = 'Menghubungi mesin kecerdasan buatan Gemini AI...';
       
       // Make the actual REST API call to backend
-      final result = await _moduleService.generateAiDevice(
+      final responseMap = await _moduleService.generateAiDevice(
         type: generateType.value,
         topik: topik.value,
         kelas: kelas.value,
@@ -66,6 +66,9 @@ class GeneratingStateController extends GetxController {
         referenceFilePath: referenceFilePath.value,
       );
 
+      final result = responseMap['result'] as String;
+      final kontenId = responseMap['kontenId'] as String?;
+
       if (_isDisposed) return;
       statusText.value = 'Memformulasikan format dokumen Merdeka...';
       await Future.delayed(const Duration(milliseconds: 500));
@@ -75,6 +78,7 @@ class GeneratingStateController extends GetxController {
         'type': generateType.value,
         'topik': topik.value,
         'result': result,
+        'kontenId': kontenId,
         'kelas': kelas.value,
         'mapel': mapel.value,
       });
