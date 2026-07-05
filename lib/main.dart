@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
 import 'app/theme/app_theme.dart';
 
 import 'package:clevora/app/data/services/auth_service.dart';
@@ -34,11 +35,44 @@ void main() async {
   Get.lazyPut(() => FaceService(), fenix: true);
   Get.lazyPut(() => AttendanceService(), fenix: true);
   Get.lazyPut(() => HasilService(), fenix: true);
-  runApp(const ClevoraApp());
+  runApp(ClevoraApp(initialRoute: getInitialRoute()));
+}
+
+String getInitialRoute() {
+  final storage = GetStorage();
+  final token = storage.read('token');
+  final userMap = storage.read('user');
+
+  if (token == null || token.toString().isEmpty || userMap == null) {
+    return AppPages.INITIAL; // Which is Routes.SPLASH
+  }
+
+  try {
+    final role = userMap['role'] as String?;
+    if (role == 'guru') {
+      final nip = userMap['nip'] as String?;
+      final sekolah = userMap['sekolah'] as String?;
+      if (nip == null || nip.isEmpty || sekolah == null || sekolah.isEmpty) {
+        return Routes.COMPLETE_PROFILE;
+      }
+      return Routes.TEACHER_MAIN;
+    } else {
+      final nisn = userMap['nisn'] as String?;
+      final kelas = userMap['kelas'] as String?;
+      final sekolah = userMap['sekolah'] as String?;
+      if (nisn == null || nisn.isEmpty || kelas == null || kelas.isEmpty || sekolah == null || sekolah.isEmpty) {
+        return Routes.COMPLETE_PROFILE;
+      }
+      return Routes.STUDENT_MAIN;
+    }
+  } catch (e) {
+    return AppPages.INITIAL;
+  }
 }
 
 class ClevoraApp extends StatelessWidget {
-  const ClevoraApp({super.key});
+  final String initialRoute;
+  const ClevoraApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +80,7 @@ class ClevoraApp extends StatelessWidget {
       title: 'Clevora',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      initialRoute: AppPages.INITIAL,
+      initialRoute: initialRoute,
       getPages: AppPages.routes,
       defaultTransition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 280),

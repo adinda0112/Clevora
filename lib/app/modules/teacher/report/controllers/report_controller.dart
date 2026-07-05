@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/hasil_service.dart';
 import 'package:clevora/app/data/models/result_model.dart';
+import 'package:clevora/app/data/services/auth_service.dart';
 
 class ReportController extends GetxController {
   final HasilService _hasilService = Get.find<HasilService>();
+  final AuthService _authService = Get.find<AuthService>();
 
   final selectedJurusan = Rxn<String>();
   final selectedKelas = Rxn<String>();
@@ -17,11 +19,20 @@ class ReportController extends GetxController {
     'IPS': ['X IPS 1', 'X IPS 2', 'XI IPS 1', 'XI IPS 2', 'XII IPS 1', 'XII IPS 2'],
   };
 
-  final List<String> mapelList = [
-    'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi',
-    'Biologi', 'Fisika', 'Sejarah', 'PJOK', 'Prakarya dan Kewirausahaan',
-    'Pendidikan Agama Islam', 'Seni Budaya', 'Bahasa Jawa', 'Kimia',
-  ];
+  final mapelList = <String>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadTeacherMapel();
+  }
+
+  void _loadTeacherMapel() {
+    final user = _authService.currentUser.value;
+    if (user != null && user.mapel != null && user.mapel!.isNotEmpty) {
+      mapelList.value = user.mapel!.split(',').map((e) => e.trim()).toList();
+    }
+  }
 
   List<ResultModel> get filteredResults {
     if (selectedKelas.value == null || selectedMapel.value == null) return [];

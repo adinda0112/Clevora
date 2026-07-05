@@ -114,6 +114,8 @@ class LoginController extends GetxController {
     try {
       isGoogleLoading.value = true;
 
+      // Sign out dulu agar dialog pilih akun selalu muncul
+      await _googleSignIn.signOut();
       // SignIn dengan Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 

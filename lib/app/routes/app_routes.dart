@@ -12,6 +12,7 @@ abstract class Routes {
   static const MANUAL_QUIZ_QUESTIONS = '/manual-quiz-questions';
   static const REPORT = '/report';
   static const PROFILE = '/profile';
+  static const SECURITY_LOG = '/security-log';
   static const EDIT_PROFILE = '/edit-profile';
   static const ATTENDANCE = '/attendance';
   static const ATTENDANCE_HISTORY = '/attendance-history';
@@ -29,4 +30,5 @@ abstract class Routes {
   static const EXAM_INSTRUCTION = '/exam-instruction';
   static const STUDENT_EXAM = '/student-exam';
   static const STUDENT_RESULT = '/student-result';
+  static const STUDENT_QR_SCANNER = '/student-qr-scanner';
 }

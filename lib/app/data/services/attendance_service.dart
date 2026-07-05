@@ -34,4 +34,22 @@ class AttendanceService extends GetxService {
     });
     return response.data?['success'] ?? false;
   }
+
+  Future<bool> scanQr({
+    required String kelas,
+    required String mapel,
+    required String tanggal,
+  }) async {
+    try {
+      final response = await _apiProvider.dio.post('/absensi/scan-qr', data: {
+        'kelas': kelas,
+        'mapel': mapel,
+        'tanggal': tanggal,
+      });
+      return response.data?['success'] ?? false;
+    } catch (e) {
+      // Dio intercepts errors and throws them, so we just rethrow
+      rethrow;
+    }
+  }
 }

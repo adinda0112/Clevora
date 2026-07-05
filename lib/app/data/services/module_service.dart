@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:clevora/app/data/models/module_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
+import 'package:dio/dio.dart' as dio;
 
 class ModuleService extends GetxService {
   final ApiProvider _apiProvider = Get.find<ApiProvider>();
@@ -109,21 +110,44 @@ class ModuleService extends GetxService {
   // Generate learning materials or quizzes using Gemini AI
   Future<String> generateAiDevice({
     required String type,
-    required String topic,
+    required String topik,
     required String kelas,
     required String mapel,
-    String? additionalPrompt,
+    String? jurusan,
+    String? catatan,
+    String? tipeKuis,
+    int? jumlahSoal,
+    String? referenceFilePath,
   }) async {
     try {
+      dynamic data;
+      
+      final Map<String, dynamic> reqData = {
+        'type': type,
+        'topik': topik,
+        'kelas': kelas,
+        'mapel': mapel,
+      };
+
+      if (jurusan != null) reqData['jurusan'] = jurusan;
+      if (catatan != null) reqData['catatan'] = catatan;
+      if (tipeKuis != null) reqData['tipeKuis'] = tipeKuis;
+      if (jumlahSoal != null) reqData['jumlahSoal'] = jumlahSoal.toString();
+
+      if (referenceFilePath != null && referenceFilePath.isNotEmpty) {
+        reqData['referenceFile'] = await dio.MultipartFile.fromFile(referenceFilePath);
+        data = dio.FormData.fromMap(reqData);
+      } else {
+        data = reqData;
+      }
+
       final response = await _apiProvider.dio.post(
         '/ai/generate',
-        data: {
-          'type': type,
-          'topic': topic,
-          'kelas': kelas,
-          'mapel': mapel,
-          'additionalPrompt': additionalPrompt,
-        },
+        data: data,
+        options: dio.Options(
+          receiveTimeout: const Duration(seconds: 120),
+          sendTimeout: const Duration(seconds: 60),
+        ),
       );
       if (response.data != null && response.data['data'] != null && response.data['data']['result'] != null) {
         return response.data['data']['result'];

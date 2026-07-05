@@ -80,10 +80,13 @@ class CompleteProfileView extends GetView<CompleteProfileController> {
                           controller: controller.nipController,
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) return 'NIP wajib diisi';
+                            if (val.trim().length != 18) return 'NIP harus terdiri dari 18 angka';
+                            if (int.tryParse(val.trim()) == null) return 'NIP hanya boleh berisi angka';
                             return null;
                           },
+                          keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            hintText: 'Nomor Induk Pegawai',
+                            hintText: 'Nomor Induk Pegawai (18 angka)',
                             prefixIcon: Icon(Icons.badge_outlined, color: AppColors.grey400),
                           ),
                         ),
@@ -124,8 +127,8 @@ class CompleteProfileView extends GetView<CompleteProfileController> {
                         const Gap(8),
                         DropdownButtonFormField<String>(
                           value: controller.selectedKelas.value,
-                          items: controller.kelasOptions.map((k) => DropdownMenuItem(value: k, child: Text('Kelas $k'))).toList(),
-                          onChanged: (v) => controller.selectedKelas.value = v ?? 'X',
+                          items: controller.kelasOptions.map((k) => DropdownMenuItem(value: k, child: Text(k))).toList(),
+                          onChanged: (v) => controller.selectedKelas.value = v ?? 'X IPA 1',
                           decoration: const InputDecoration(
                             hintText: 'Pilih kelas',
                             prefixIcon: Icon(Icons.class_outlined, color: AppColors.grey400),

@@ -208,6 +208,22 @@ class AuthService extends GetxService {
     Get.offAllNamed(Routes.LOGIN);
   }
 
+  void _navigateBasedOnRole(UserModel user) {
+    if (user.role == 'guru') {
+      if (user.nip == null || user.nip!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty) {
+        Get.offAllNamed(Routes.COMPLETE_PROFILE);
+      } else {
+        Get.offAllNamed(Routes.TEACHER_MAIN);
+      }
+    } else {
+      if (user.nisn == null || user.nisn!.isEmpty || user.kelas == null || user.kelas!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty) {
+        Get.offAllNamed(Routes.COMPLETE_PROFILE);
+      } else {
+        Get.offAllNamed(Routes.STUDENT_MAIN);
+      }
+    }
+  }
+
   Future<void> autoLogin() async {
     final token = _storage.read<String>('token');
     if (token == null || token.isEmpty) {
@@ -218,22 +234,14 @@ class AuthService extends GetxService {
     try {
       final user = await getMe();
       if (user != null) {
-        if (user.role == 'guru') {
-          Get.offAllNamed(Routes.TEACHER_MAIN);
-        } else {
-          Get.offAllNamed(Routes.STUDENT_MAIN);
-        }
+        _navigateBasedOnRole(user);
       } else {
         logout();
       }
     } catch (_) {
       final cachedUser = currentUser.value;
       if (cachedUser != null) {
-        if (cachedUser.role == 'guru') {
-          Get.offAllNamed(Routes.TEACHER_MAIN);
-        } else {
-          Get.offAllNamed(Routes.STUDENT_MAIN);
-        }
+        _navigateBasedOnRole(cachedUser);
       } else {
         logout();
       }

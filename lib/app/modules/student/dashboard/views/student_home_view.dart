@@ -63,7 +63,7 @@ class StudentHomeView extends GetView<StudentHomeController> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Get.snackbar('QR Absen', 'Fitur scan QR absen sedang dalam pengembangan');
+                        Get.toNamed('/student-qr-scanner');
                       },
                       icon: const Icon(Icons.qr_code_scanner, color: AppColors.primaryPurple),
                       label: const Text(
@@ -147,73 +147,103 @@ class StudentHomeView extends GetView<StudentHomeController> {
                     ),
                   ),
                   const Gap(12),
-                  Obx(
-                    () => Column(
-                      children: controller.activities.map((activity) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(color: AppColors.grey200, width: 0.5),
+                  Obx(() {
+                    if (controller.activities.isEmpty) {
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        decoration: BoxDecoration(
+                          color: AppColors.grey50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.grey200, style: BorderStyle.solid),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(Icons.inbox_outlined, color: AppColors.grey400, size: 40),
+                            Gap(8),
+                            Text(
+                              'Belum ada aktivitas terbaru',
+                              style: TextStyle(color: AppColors.grey600, fontSize: 13),
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  color: activity['bg'],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(activity['icon'], color: activity['color'], size: 20),
+                          ],
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: controller.activities.map((activity) {
+                        return GestureDetector(
+                          onTap: () {
+                            if (activity['type'] == 'quiz') {
+                              Get.find<StudentMainController>().changePage(2);
+                            } else {
+                              Get.find<StudentMainController>().changePage(1);
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: AppColors.grey200, width: 0.5),
                               ),
-                              const Gap(12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      activity['title'],
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.grey900,
-                                      ),
-                                    ),
-                                    const Gap(2),
-                                    Text(
-                                      activity['subtitle'],
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.grey600,
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: activity['bg'],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(activity['icon'], color: activity['color'], size: 20),
                                 ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: activity['statusBg'],
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  activity['status'],
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: activity['statusColor'],
+                                const Gap(12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        activity['title'],
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.grey900,
+                                        ),
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        activity['subtitle'],
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.grey600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: activity['statusBg'],
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    activity['status'],
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: activity['statusColor'],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }).toList(),
-                    ),
-                  ),
+                    );
+                  }),
                   const Gap(24),
                   const Text(
                     'Jelajah',

@@ -73,6 +73,24 @@ class StudentHomeController extends GetxController {
         stats[1]['value'] = (data['rata_rata_nilai'] ?? 0.0).toString();
         stats[2]['value'] = (data['peringkat'] ?? 0).toString();
         stats.refresh();
+
+        // Parse recent activities
+        if (data['recentActivities'] != null) {
+          final List rawActivities = data['recentActivities'];
+          activities.value = rawActivities.map((act) {
+            final isQuiz = act['type'] == 'quiz';
+            return {
+              'title': act['title'] ?? '-',
+              'subtitle': act['subtitle'] ?? '-',
+              'status': act['status'] ?? 'Baru',
+              'icon': isQuiz ? Icons.timer_outlined : Icons.menu_book,
+              'color': isQuiz ? AppColors.teal : AppColors.primaryPurple,
+              'bg': isQuiz ? AppColors.lightTeal : AppColors.lightPurple,
+              'statusColor': isQuiz ? const Color(0xFF633806) : const Color(0xFF3B6D11),
+              'statusBg': isQuiz ? AppColors.lightAmber : const Color(0xFFEAF3DE),
+            };
+          }).toList();
+        }
       }
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal memuat statistik: $e',
@@ -127,26 +145,5 @@ class StudentHomeController extends GetxController {
     },
   ].obs;
 
-  final activities = <Map<String, dynamic>>[
-    {
-      'title': 'Membaca Modul Algoritma',
-      'subtitle': 'Selesai 80%',
-      'status': 'Lanjut',
-      'icon': Icons.menu_book,
-      'color': AppColors.primaryPurple,
-      'bg': AppColors.lightPurple,
-      'statusColor': const Color(0xFF3B6D11),
-      'statusBg': const Color(0xFFEAF3DE),
-    },
-    {
-      'title': 'Quiz Struktur Data',
-      'subtitle': 'Tenggat besok 23:59',
-      'status': 'Pending',
-      'icon': Icons.timer_outlined,
-      'color': AppColors.teal,
-      'bg': AppColors.lightTeal,
-      'statusColor': const Color(0xFF633806),
-      'statusBg': AppColors.lightAmber,
-    },
-  ].obs;
+  final activities = <Map<String, dynamic>>[].obs;
 }

@@ -17,8 +17,11 @@ class CompleteProfileController extends GetxController {
   late final TextEditingController nisnController;
   late final TextEditingController sekolahController;
 
-  final selectedKelas = 'X'.obs;
-  final kelasOptions = ['X', 'XI', 'XII'];
+  final selectedKelas = 'X IPA 1'.obs;
+  final kelasOptions = [
+    'X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPA 2',
+    'X IPS 1', 'X IPS 2', 'XI IPS 1', 'XI IPS 2', 'XII IPS 1', 'XII IPS 2',
+  ];
 
   final selectedMapel = 'Informatika'.obs;
   final mapelOptions = ['Informatika', 'Matematika', 'Bahasa Inggris', 'Fisika'];

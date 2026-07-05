@@ -125,7 +125,7 @@ class ReportView extends GetView<ReportController> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
+          child: Obx(() => ListView.builder(
             padding: const EdgeInsets.all(20),
             itemCount: controller.mapelList.length,
             itemBuilder: (context, index) {
@@ -142,7 +142,7 @@ class ReportView extends GetView<ReportController> {
                 ),
               );
             },
-          ),
+          )),
         ),
       ],
     );

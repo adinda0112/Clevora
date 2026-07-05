@@ -35,9 +35,22 @@ class GenerateFormView extends GetView<GenerateFormController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildLabel('Mata Pelajaran'),
-            _buildTextField(
-              hint: 'Contoh: Informatika',
-              onChanged: (v) => controller.mataPelajaran.value = v,
+            Obx(
+              () => DropdownButtonFormField<String>(
+                value: controller.mataPelajaran.value.isEmpty ? null : controller.mataPelajaran.value,
+                decoration: _inputDecoration().copyWith(hintText: 'Pilih Mata Pelajaran'),
+                items: [
+                  'Bahasa Indonesia', 'Bahasa Inggris', 'Matematika', 
+                  'Informatika', 'Fisika', 'Kimia', 'Biologi', 
+                  'Sejarah', 'Geografi', 'Ekonomi', 'Sosiologi', 
+                  'Pendidikan Pancasila', 'Seni Budaya', 'PJOK', 'Prakarya'
+                ].map((String val) {
+                  return DropdownMenuItem(value: val, child: Text(val));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) controller.mataPelajaran.value = val;
+                },
+              ),
             ),
             const Gap(16),
 
@@ -68,25 +81,55 @@ class GenerateFormView extends GetView<GenerateFormController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLabel('Upload Template (Opsional)'),
-                Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColors.grey50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.grey200),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () {
-                      Get.snackbar('Upload', 'Fitur upload file sedang dalam pengembangan');
-                    },
-                    icon: const Icon(Icons.upload_file, color: AppColors.primaryPurple),
-                    label: const Text(
-                      'Pilih File PDF/DOCX',
-                      style: TextStyle(color: AppColors.grey600),
+                Obx(() {
+                  if (controller.selectedFileName.value.isNotEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightTeal,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.teal),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.picture_as_pdf, color: AppColors.teal),
+                          const Gap(12),
+                          Expanded(
+                            child: Text(
+                              controller.selectedFileName.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.red),
+                            onPressed: controller.removeFile,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.grey50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.grey200),
                     ),
-                  ),
-                ),
+                    child: TextButton.icon(
+                      onPressed: controller.pickFile,
+                      icon: const Icon(Icons.upload_file, color: AppColors.primaryPurple),
+                      label: const Text(
+                        'Pilih File PDF Referensi',
+                        style: TextStyle(color: AppColors.grey600),
+                      ),
+                    ),
+                  );
+                }),
                 const Gap(16),
               ],
             ),

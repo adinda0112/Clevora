@@ -11,10 +11,10 @@ class ProfileController extends GetxController {
   final email = ''.obs;
 
   final settings = <Map<String, dynamic>>[
-    {'title': 'Account settings', 'icon': Icons.person_outline},
-    {'title': 'Notifications', 'icon': Icons.notifications_none},
-    {'title': 'Privacy & security', 'icon': Icons.lock_outline},
-    {'title': 'Help center', 'icon': Icons.help_outline},
+    {'title': 'Account settings', 'icon': Icons.person_outline, 'route': ''},
+    {'title': 'Log Keamanan & Audit', 'icon': Icons.security, 'route': '/security-log'},
+    {'title': 'Notifications', 'icon': Icons.notifications_none, 'route': ''},
+    {'title': 'Help center', 'icon': Icons.help_outline, 'route': ''},
   ].obs;
 
   late final Worker _userWorker;

@@ -9,7 +9,10 @@ class GeneratingStateController extends GetxController {
   final topik = ''.obs;
   final kelas = ''.obs;
   final mapel = ''.obs;
-  final additionalPrompt = ''.obs;
+  final tipeKuis = ''.obs;
+  final jumlahSoal = 10.obs;
+  final catatan = ''.obs;
+  final referenceFilePath = ''.obs;
   
   final statusText = 'Memulai proses...'.obs;
   bool _isDisposed = false;
@@ -23,7 +26,10 @@ class GeneratingStateController extends GetxController {
       topik.value = args['topik'] ?? 'Topik Umum';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
-      additionalPrompt.value = args['additionalPrompt'] ?? '';
+      tipeKuis.value = args['tipeKuis'] ?? 'Latihan';
+      jumlahSoal.value = args['jumlahSoal'] ?? 10;
+      catatan.value = args['catatan'] ?? '';
+      referenceFilePath.value = args['referenceFilePath'] ?? '';
     }
     _startAiGeneration();
   }
@@ -51,10 +57,13 @@ class GeneratingStateController extends GetxController {
       // Make the actual REST API call to backend
       final result = await _moduleService.generateAiDevice(
         type: generateType.value,
-        topic: topik.value,
+        topik: topik.value,
         kelas: kelas.value,
         mapel: mapel.value,
-        additionalPrompt: additionalPrompt.value,
+        tipeKuis: tipeKuis.value,
+        jumlahSoal: jumlahSoal.value,
+        catatan: catatan.value,
+        referenceFilePath: referenceFilePath.value,
       );
 
       if (_isDisposed) return;

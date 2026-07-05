@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
+import 'dart:convert';
 
 class ParsedQuestion {
   final String questionText;
@@ -32,6 +33,10 @@ class AiResultController extends GetxController {
   final isEditing = false.obs;
   final hasSaved = false.obs;
   final textEditController = TextEditingController();
+  
+  // Store original parsed questions for Quiz
+  List<ParsedQuestion> _originalParsedQuestions = [];
+  bool _wasEdited = false;
 
   @override
   void onInit() {
@@ -40,11 +45,41 @@ class AiResultController extends GetxController {
     if (args != null) {
       generateType.value = args['type'] ?? 'Modul';
       topik.value = args['topik'] ?? 'Topik Umum';
-      resultText.value = args['result'] ?? 'Tidak ada konten hasil generate.';
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
+      
+      String rawResult = args['result'] ?? '';
+      
+      if (generateType.value == 'Quiz') {
+        _originalParsedQuestions = _parseQuizJson(rawResult);
+        // Format to beautiful markdown for viewing
+        resultText.value = _formatQuizToMarkdown(_originalParsedQuestions);
+      } else {
+        resultText.value = rawResult;
+      }
+      
       textEditController.text = resultText.value;
     }
+  }
+
+  String _formatQuizToMarkdown(List<ParsedQuestion> qs) {
+    if (qs.isEmpty) return 'Gagal memproses kuis dari AI.';
+    StringBuffer sb = new StringBuffer();
+    sb.writeln('### Kuis: ${topik.value}\n');
+    for (int i = 0; i < qs.length; i++) {
+      sb.writeln('**Soal ${i + 1}:** ${qs[i].questionText}');
+      for (int j = 0; j < qs[i].options.length; j++) {
+        sb.writeln('- ${qs[i].options[j]}');
+      }
+      sb.writeln('');
+    }
+    sb.writeln('### Kunci Jawaban & Pembahasan\n');
+    final letters = ['A', 'B', 'C', 'D'];
+    for (int i = 0; i < qs.length; i++) {
+      String letter = qs[i].correctIndex >= 0 && qs[i].correctIndex < 4 ? letters[qs[i].correctIndex] : 'A';
+      sb.writeln('${i + 1}. **$letter** - ${qs[i].explanation}');
+    }
+    return sb.toString();
   }
 
   @override
@@ -53,144 +88,49 @@ class AiResultController extends GetxController {
     super.onClose();
   }
 
-  List<ParsedQuestion> _parseQuizMarkdown(String text) {
-    final List<ParsedQuestion> questions = [];
-    final lines = text.split('\n');
-
-    // 1. First, locate the "Kunci Jawaban" or "Kunci" section
-    int kunciSectionIndex = -1;
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i].toLowerCase();
-      if (line.contains('kunci jawaban') || line.contains('kunci:') || (line.contains('###') && line.contains('kunci'))) {
-        kunciSectionIndex = i;
-        break;
+  List<ParsedQuestion> _parseQuizJson(String text) {
+    try {
+      // Find the first '[' and last ']' to extract JSON array
+      final startIndex = text.indexOf('[');
+      final endIndex = text.lastIndexOf(']');
+      
+      if (startIndex == -1 || endIndex == -1) {
+        throw 'Bukan JSON array';
       }
+      
+      final jsonString = text.substring(startIndex, endIndex + 1);
+      final List<dynamic> decodedList = jsonDecode(jsonString);
+      
+      return decodedList.map((item) {
+        return ParsedQuestion(
+          questionText: item['questionText']?.toString() ?? '',
+          options: (item['options'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+          correctIndex: item['correctIndex'] is int ? item['correctIndex'] : 0,
+          explanation: item['explanation']?.toString() ?? '',
+        );
+      }).toList();
+    } catch (e) {
+      print('Failed to parse Quiz JSON: $e');
+      return [];
     }
-
-    // Parse keys and explanations from keys section if found
-    final Map<int, String> correctLetters = {};
-    final Map<int, String> explanations = {};
-
-    if (kunciSectionIndex != -1) {
-      final keyRegex = RegExp(
-        r'(\d+)[\.\s:]+\*?\*?([A-D])\*?\*?\s*(?:\((.*?)\)|-\s*(.*?)|:\s*(.*?)|(.*))?',
-        caseSensitive: false,
-      );
-
-      for (int i = kunciSectionIndex + 1; i < lines.length; i++) {
-        final line = lines[i].trim();
-        if (line.isEmpty) continue;
-        final match = keyRegex.firstMatch(line);
-        if (match != null) {
-          final qNum = int.tryParse(match.group(1) ?? '');
-          final letter = match.group(2)?.toUpperCase();
-          if (qNum != null && letter != null) {
-            correctLetters[qNum] = letter;
-            
-            String exp = '';
-            for (int g = 3; g <= 6; g++) {
-              final val = match.group(g)?.trim();
-              if (val != null && val.isNotEmpty) {
-                exp = val;
-                break;
-              }
-            }
-            if (exp.endsWith(')')) {
-              exp = exp.substring(0, exp.length - 1);
-            }
-            explanations[qNum] = exp;
-          }
-        }
-      }
-    }
-
-    // 2. Parse the questions
-    final int endSearchIndex = kunciSectionIndex != -1 ? kunciSectionIndex : lines.length;
-    
-    String currentQuestionText = '';
-    List<String> currentOptions = [];
-    int currentQuestionNum = -1;
-
-    void commitQuestion() {
-      if (currentQuestionNum != -1 && currentQuestionText.isNotEmpty && currentOptions.length >= 2) {
-        final String letter = correctLetters[currentQuestionNum] ?? 'A';
-        int correctIdx = 0;
-        if (letter == 'B') {
-          correctIdx = 1;
-        } else if (letter == 'C') {
-          correctIdx = 2;
-        } else if (letter == 'D') {
-          correctIdx = 3;
-        }
-
-        final explanationText = explanations[currentQuestionNum] ?? '';
-
-        questions.add(ParsedQuestion(
-          questionText: currentQuestionText.trim(),
-          options: List.from(currentOptions),
-          correctIndex: correctIdx,
-          explanation: explanationText,
-        ));
-      }
-      currentQuestionText = '';
-      currentOptions = [];
-      currentQuestionNum = -1;
-    }
-
-    final questionRegex = RegExp(
-      r'^(?:\*?\*?\s*Soal\s+(\d+)\s*[:\.]?\s*\*?\*?|^\s*(\d+)[\.\s]+(?![A-D][\.\s]))\s*(.*)',
-      caseSensitive: false,
-    );
-
-    final optionRegex = RegExp(
-      r'^\s*[\*\-]?\s*\*?\*?\s*([A-D])\s*[\.\):]\s*\*?\*?\s*(.*)',
-      caseSensitive: false,
-    );
-
-    for (int i = 0; i < endSearchIndex; i++) {
-      final line = lines[i];
-      final trimmed = line.trim();
-      if (trimmed.isEmpty) continue;
-
-      final qMatch = questionRegex.firstMatch(trimmed);
-      if (qMatch != null) {
-        commitQuestion();
-        final qNumStr = qMatch.group(1) ?? qMatch.group(2) ?? '';
-        currentQuestionNum = int.tryParse(qNumStr) ?? -1;
-        currentQuestionText = qMatch.group(3) ?? '';
-        continue;
-      }
-
-      final optMatch = optionRegex.firstMatch(trimmed);
-      if (optMatch != null && currentQuestionNum != -1) {
-        final optText = optMatch.group(2) ?? '';
-        currentOptions.add(optText.trim());
-        continue;
-      }
-
-      if (currentQuestionNum != -1) {
-        if (currentOptions.isEmpty) {
-          currentQuestionText += '\n$line';
-        } else {
-          currentOptions[currentOptions.length - 1] += '\n$line';
-        }
-      }
-    }
-
-    commitQuestion();
-    return questions;
   }
 
   void toggleEdit() {
     if (isEditing.value) {
       // Save changes
       resultText.value = textEditController.text;
+      _wasEdited = true;
+    } else {
+      textEditController.text = resultText.value;
     }
     isEditing.toggle();
   }
 
   void finishProcess() {
-    Get.until((route) => Get.currentRoute == Routes.MODULE_AI || Get.currentRoute == Routes.TEACHER_HOME);
+    Get.until((route) => 
+        route.settings.name == Routes.MODULE_AI || 
+        route.settings.name == Routes.TEACHER_MAIN || 
+        route.settings.name == Routes.TEACHER_HOME);
   }
 
   /// Save only — no share dialog
@@ -200,14 +140,14 @@ class AiResultController extends GetxController {
       // Navigate to appropriate history page
       if (generateType.value == 'Quiz') {
         Get.until((route) =>
-            Get.currentRoute == Routes.QUIZ_MANAGEMENT ||
-            Get.currentRoute == Routes.TEACHER_MAIN ||
-            Get.currentRoute == Routes.TEACHER_HOME);
+            route.settings.name == Routes.QUIZ_MANAGEMENT ||
+            route.settings.name == Routes.TEACHER_MAIN ||
+            route.settings.name == Routes.TEACHER_HOME);
       } else {
         Get.until((route) =>
-            Get.currentRoute == Routes.MODULE_AI ||
-            Get.currentRoute == Routes.TEACHER_MAIN ||
-            Get.currentRoute == Routes.TEACHER_HOME);
+            route.settings.name == Routes.MODULE_AI ||
+            route.settings.name == Routes.TEACHER_MAIN ||
+            route.settings.name == Routes.TEACHER_HOME);
       }
     }
   }
@@ -234,9 +174,15 @@ class AiResultController extends GetxController {
           jenis: generateType.value,
         );
       } else if (generateType.value == 'Quiz') {
-        final parsed = _parseQuizMarkdown(resultText.value);
+        List<ParsedQuestion> parsed;
+        if (!_wasEdited && _originalParsedQuestions.isNotEmpty) {
+          parsed = _originalParsedQuestions;
+        } else {
+          throw 'Anda telah mengedit kuis secara manual. Saat ini sistem hanya mendukung penyimpanan kuis murni dari AI tanpa editan agar struktur (A/B/C/D) tidak rusak. Silakan Generate Ulang atau simpan tanpa mengedit.';
+        }
+        
         if (parsed.isEmpty) {
-          throw 'Format kuis hasil AI tidak dapat diproses. Harap generate ulang atau buat manual.';
+          throw 'Format kuis hasil AI tidak dapat diproses.';
         }
         final newQuiz = await _quizService.createQuiz(
           judul: 'Kuis AI: ${topik.value}',

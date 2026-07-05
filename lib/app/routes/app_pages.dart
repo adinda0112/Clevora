@@ -54,12 +54,16 @@ import 'package:clevora/app/modules/student/student_exam/bindings/student_exam_b
 import 'package:clevora/app/modules/student/student_exam/views/student_exam_view.dart';
 import 'package:clevora/app/modules/student/student_result/bindings/student_result_binding.dart';
 import 'package:clevora/app/modules/student/student_result/views/student_result_view.dart';
+import 'package:clevora/app/modules/student/student_qr_scanner/bindings/student_qr_scanner_binding.dart';
+import 'package:clevora/app/modules/student/student_qr_scanner/views/student_qr_scanner_view.dart';
 
 // Shared
 import 'package:clevora/app/modules/shared/profile/bindings/profile_binding.dart';
 import 'package:clevora/app/modules/shared/profile/views/profile_view.dart';
 import 'package:clevora/app/modules/shared/edit_profile/views/edit_profile_view.dart';
 import 'package:clevora/app/modules/shared/edit_profile/bindings/edit_profile_binding.dart';
+import 'package:clevora/app/modules/shared/profile/views/security_log_view.dart';
+import 'package:clevora/app/modules/shared/profile/bindings/security_log_binding.dart';
 
 class AppPages {
   static const INITIAL = Routes.SPLASH;
@@ -96,9 +100,11 @@ class AppPages {
     GetPage(name: Routes.EXAM_INSTRUCTION, page: () => const ExamInstructionView(), binding: ExamInstructionBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.STUDENT_EXAM, page: () => const StudentExamView(), binding: StudentExamBinding(), transition: Transition.fadeIn),
     GetPage(name: Routes.STUDENT_RESULT, page: () => const StudentResultView(), binding: StudentResultBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.STUDENT_QR_SCANNER, page: () => const StudentQrScannerView(), binding: StudentQrScannerBinding(), transition: Transition.fadeIn),
     
     // Shared
     GetPage(name: Routes.PROFILE, page: () => const ProfileView(), binding: ProfileBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.SECURITY_LOG, page: () => const SecurityLogView(), binding: SecurityLogBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.EDIT_PROFILE, page: () => EditProfileView(), binding: EditProfileBinding(), transition: Transition.rightToLeft),
   ];
 }

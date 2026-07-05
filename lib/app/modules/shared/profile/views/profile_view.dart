@@ -157,6 +157,11 @@ class ProfileView extends GetView<ProfileController> {
                           (item) => Column(
                             children: [
                               ListTile(
+                                onTap: () {
+                                  if (item['route'] != null && item['route'].toString().isNotEmpty) {
+                                    Get.toNamed(item['route']);
+                                  }
+                                },
                                 contentPadding: EdgeInsets.zero,
                                 leading: Icon(
                                   item['icon'] as IconData,

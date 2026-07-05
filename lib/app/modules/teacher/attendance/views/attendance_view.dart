@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:gap/gap.dart';
 import 'package:clevora/app/modules/teacher/attendance/controllers/attendance_controller.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'dart:convert';
 
 class AttendanceView extends GetView<AttendanceController> {
   const AttendanceView({super.key});
@@ -22,10 +24,62 @@ class AttendanceView extends GetView<AttendanceController> {
             onPressed: () => Get.toNamed('/attendance-history'),
           ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
+            icon: const Icon(Icons.qr_code_2),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fitur QR Scanner akan segera hadir!')),
+              if (controller.selectedKelas.value.isEmpty || controller.selectedMapel.value.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Silakan pilih Kelas dan Mata Pelajaran terlebih dahulu')),
+                );
+                return;
+              }
+
+              final qrData = jsonEncode({
+                'type': 'attendance',
+                'kelas': controller.selectedKelas.value,
+                'mapel': controller.selectedMapel.value,
+                'tanggal': '${controller.selectedDate.value.year}-${controller.selectedDate.value.month.toString().padLeft(2, '0')}-${controller.selectedDate.value.day.toString().padLeft(2, '0')}',
+              });
+
+              Get.dialog(
+                Dialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Scan QR untuk Absen',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkPurple),
+                        ),
+                        const Gap(8),
+                        Text(
+                          '${controller.selectedKelas.value} - ${controller.selectedMapel.value}',
+                          style: const TextStyle(fontSize: 14, color: AppColors.grey600),
+                        ),
+                        const Gap(24),
+                        QrImageView(
+                          data: qrData,
+                          version: QrVersions.auto,
+                          size: 250.0,
+                          backgroundColor: Colors.white,
+                        ),
+                        const Gap(24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => Get.back(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryPurple,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: const Text('Tutup', style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               );
             },
           ),
