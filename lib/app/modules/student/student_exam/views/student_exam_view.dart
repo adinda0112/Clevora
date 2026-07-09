@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:clevora/app/widgets/debouncer.dart';
 import 'package:get/get.dart';
 import 'package:gap/gap.dart';
 import 'package:camera/camera.dart';
@@ -272,7 +273,7 @@ class StudentExamView extends GetView<StudentExamController> {
                     final total = controller.quiz.value?.soal.length ?? 0;
                     if (controller.currentQuestionIndex.value < total - 1) {
                       return ElevatedButton(
-                        onPressed: controller.nextQuestion,
+                        onPressed: Debouncer.wrap(controller.nextQuestion, tag: 'exam_next'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryPurple,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -281,7 +282,7 @@ class StudentExamView extends GetView<StudentExamController> {
                       );
                     } else {
                       return ElevatedButton(
-                        onPressed: controller.confirmSubmit,
+                        onPressed: Debouncer.wrap(controller.confirmSubmit, tag: 'exam_submit'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.teal,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

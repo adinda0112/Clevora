@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/module_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
+import 'package:clevora/app/modules/teacher/dashboard/controllers/teacher_home_controller.dart';
+import 'package:clevora/app/modules/teacher/quiz_management/controllers/quiz_management_controller.dart';
 import 'dart:convert';
 
 class ParsedQuestion {
@@ -29,6 +32,7 @@ class AiResultController extends GetxController {
   final kelas = ''.obs;
   final mapel = ''.obs;
   final kontenId = ''.obs;
+  final tipeKuis = ''.obs;
 
   final isSaving = false.obs;
   final isEditing = false.obs;
@@ -49,6 +53,7 @@ class AiResultController extends GetxController {
       kelas.value = args['kelas'] ?? 'X';
       mapel.value = args['mapel'] ?? 'Informatika';
       kontenId.value = args['kontenId'] ?? '';
+      tipeKuis.value = args['tipeKuis'] ?? 'Pretest';
       
       String rawResult = args['result'] ?? '';
       
@@ -112,7 +117,7 @@ class AiResultController extends GetxController {
         );
       }).toList();
     } catch (e) {
-      print('Failed to parse Quiz JSON: $e');
+      debugPrint('Failed to parse Quiz JSON: $e');
       return [];
     }
   }
@@ -139,24 +144,39 @@ class AiResultController extends GetxController {
   Future<void> saveOnly() async {
     await _doSave(shareClass: null);
     if (hasSaved.value) {
-      // Navigate to appropriate history page
-      if (generateType.value == 'Quiz') {
-        Get.until((route) =>
-            route.settings.name == Routes.QUIZ_MANAGEMENT ||
-            route.settings.name == Routes.TEACHER_MAIN ||
-            route.settings.name == Routes.TEACHER_HOME);
-      } else {
-        Get.until((route) =>
-            route.settings.name == Routes.MODULE_AI ||
-            route.settings.name == Routes.TEACHER_MAIN ||
-            route.settings.name == Routes.TEACHER_HOME);
+      _navigateBack();
+    }
+  }
+
+  void _navigateBack() {
+    if (generateType.value == 'Quiz') {
+      if (Get.isRegistered<QuizManagementController>()) {
+        Get.find<QuizManagementController>().fetchQuizzes();
       }
+      if (Get.isRegistered<TeacherHomeController>()) {
+        Get.find<TeacherHomeController>().fetchDashboardStats();
+      }
+      Get.until((route) =>
+          route.settings.name == Routes.QUIZ_MANAGEMENT ||
+          route.settings.name == Routes.TEACHER_MAIN ||
+          route.settings.name == Routes.TEACHER_HOME);
+    } else {
+      if (Get.isRegistered<TeacherHomeController>()) {
+        Get.find<TeacherHomeController>().fetchDashboardStats();
+      }
+      Get.until((route) =>
+          route.settings.name == Routes.MODULE_AI ||
+          route.settings.name == Routes.TEACHER_MAIN ||
+          route.settings.name == Routes.TEACHER_HOME);
     }
   }
 
   /// Save + share to a selected class
   Future<void> saveAndShare({required String shareClass}) async {
     await _doSave(shareClass: shareClass);
+    if (hasSaved.value) {
+      _navigateBack();
+    }
   }
 
   Future<void> _doSave({String? shareClass}) async {
@@ -186,8 +206,9 @@ class AiResultController extends GetxController {
         if (parsed.isEmpty) {
           throw 'Format kuis hasil AI tidak dapat diproses.';
         }
+        final prefix = tipeKuis.value.isNotEmpty ? '${tipeKuis.value} AI' : 'Kuis AI';
         final newQuiz = await _quizService.createQuiz(
-          judul: 'Kuis AI: ${topik.value}',
+          judul: '$prefix: ${topik.value}',
           deskripsi:
               'Evaluasi Pembelajaran Mandiri untuk Kelas ${shareClass ?? kelas.value} mata pelajaran ${mapel.value} hasil rancangan Clevora AI.',
           mapel: mapel.value,

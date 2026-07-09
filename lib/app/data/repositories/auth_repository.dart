@@ -36,4 +36,20 @@ class AuthRepository {
     });
     return response.data;
   }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await apiProvider.dio.post('/auth/forgot-password', data: {
+      'email': email,
+    });
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
+    final response = await apiProvider.dio.post('/auth/reset-password', data: {
+      'email': email,
+      'otp': otp,
+      'newPassword': newPassword,
+    });
+    return response.data;
+  }
 }

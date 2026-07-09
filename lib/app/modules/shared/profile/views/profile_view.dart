@@ -133,7 +133,7 @@ class ProfileView extends GetView<ProfileController> {
                         const Divider(height: 20),
                         _buildInfoRow('Mata Pelajaran', user.mapel ?? '-'),
                         const Divider(height: 20),
-                        _buildInfoRow('Jenjang', user.jenjang ?? '-'),
+                        _buildInfoRow('Sekolah', user.sekolah ?? '-'),
                       ] else ...[
                         _buildInfoRow('NISN', user.nisn ?? '-'),
                         const Divider(height: 20),
@@ -224,15 +224,37 @@ class ProfileView extends GetView<ProfileController> {
                   onPressed: () {
                     Get.defaultDialog(
                       title: 'Konfirmasi Logout',
-                      middleText: 'Apakah Anda yakin ingin keluar dari aplikasi?',
-                      textConfirm: 'Ya, Keluar',
-                      textCancel: 'Batal',
-                      confirmTextColor: Colors.white,
-                      buttonColor: const Color(0xFFEF4444),
-                      onConfirm: () {
-                        Get.back();
-                        controller.logout();
-                      },
+                      titleStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                      titlePadding: const EdgeInsets.only(top: 24),
+                      contentPadding: const EdgeInsets.all(24),
+                      radius: 16,
+                      content: const Column(
+                        children: [
+                          Icon(Icons.logout, size: 48, color: Colors.red),
+                          SizedBox(height: 16),
+                          Text(
+                            'Apakah Anda yakin ingin keluar dari aplikasi?',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                      confirm: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Get.back();
+                          controller.logout();
+                        },
+                        child: const Text('Ya, Keluar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                      cancel: TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Batal', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.logout, color: Colors.white),

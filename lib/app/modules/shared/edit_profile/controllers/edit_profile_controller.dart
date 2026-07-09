@@ -28,7 +28,14 @@ class EditProfileController extends GetxController {
   late final TextEditingController mapelController;
 
   final selectedKelas = ''.obs;
-  final kelasOptions = ['X', 'XI', 'XII'];
+  final kelasOptions = ['X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPA 2', 'X IPS 1', 'X IPS 2', 'XI IPS 1', 'XI IPS 2', 'XII IPS 1', 'XII IPS 2'];
+
+  final selectedMapel = ''.obs;
+  final mapelOptions = [
+    'Informatika', 'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi',
+    'Biologi', 'Fisika', 'Sejarah', 'PJOK', 'Prakarya dan Kewirausahaan',
+    'Pendidikan Agama Islam', 'Seni Budaya', 'Bahasa Jawa', 'Kimia'
+  ];
 
   @override
   void onInit() {
@@ -44,7 +51,15 @@ class EditProfileController extends GetxController {
     nisnController = TextEditingController(text: user?.nisn ?? '');
     sekolahController = TextEditingController(text: user?.sekolah ?? '');
     mapelController = TextEditingController(text: user?.mapel ?? '');
-    selectedKelas.value = user?.kelas ?? 'X';
+    selectedKelas.value = user?.kelas ?? 'X IPA 1';
+    
+    // Init dropdown values for guru
+    final userMapel = user?.mapel ?? '';
+    if (userMapel.isNotEmpty && mapelOptions.contains(userMapel)) {
+      selectedMapel.value = userMapel;
+    } else if (mapelOptions.isNotEmpty) {
+      selectedMapel.value = mapelOptions.first;
+    }
   }
 
   @override
@@ -100,9 +115,7 @@ class EditProfileController extends GetxController {
         if (sekolahController.text.trim().isNotEmpty) {
           data['sekolah'] = sekolahController.text.trim();
         }
-        if (mapelController.text.trim().isNotEmpty) {
-          data['mapel'] = mapelController.text.trim();
-        }
+        data['mapel'] = selectedMapel.value;
       } else {
         if (nisnController.text.trim().isNotEmpty) {
           data['nisn'] = nisnController.text.trim();

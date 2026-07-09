@@ -7,6 +7,7 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/widgets/menu_card.dart';
 import 'package:clevora/app/modules/student/dashboard/controllers/student_home_controller.dart';
 import 'package:clevora/app/modules/student/student_main/controllers/student_main_controller.dart';
+import 'package:clevora/app/modules/student/student_quiz/controllers/student_quiz_controller.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 
 class StudentHomeView extends GetView<StudentHomeController> {
@@ -35,9 +36,9 @@ class StudentHomeView extends GetView<StudentHomeController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Halo 👋',
-                            style: TextStyle(
+                          Text(
+                            controller.greeting,
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -153,6 +154,15 @@ class StudentHomeView extends GetView<StudentHomeController> {
                             if (index == 0) {
                               Get.find<StudentMainController>().changePage(1); // Ke tab Learning
                             } else if (index == 1 || index == 2 || index == 3) {
+                              // Ensure QuizController is registered
+                              final quizCtrl = Get.isRegistered<StudentQuizController>() 
+                                  ? Get.find<StudentQuizController>() 
+                                  : Get.put(StudentQuizController());
+                              
+                              if (index == 1) quizCtrl.activeFilter.value = 'Pretest';
+                              if (index == 2) quizCtrl.activeFilter.value = 'Posttest';
+                              if (index == 3) quizCtrl.activeFilter.value = 'Ujian';
+                              
                               Get.find<StudentMainController>().changePage(2); // Ke tab Kuis
                             } else {
                               Get.snackbar(

@@ -81,6 +81,7 @@ class GeneratingStateController extends GetxController {
         'kontenId': kontenId,
         'kelas': kelas.value,
         'mapel': mapel.value,
+        'tipeKuis': tipeKuis.value,
       });
     } catch (e) {
       if (_isDisposed) return;

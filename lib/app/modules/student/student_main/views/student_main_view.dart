@@ -21,7 +21,12 @@ class StudentMainView extends GetView<StudentMainController> {
     ];
 
     return Scaffold(
-      body: Obx(() => pages[controller.currentIndex.value]),
+      body: Obx(
+        () => IndexedStack(
+          index: controller.currentIndex.value,
+          children: pages,
+        ),
+      ),
       bottomNavigationBar: Obx(
         () => StudentBottomNav(
           currentIndex: controller.currentIndex.value,

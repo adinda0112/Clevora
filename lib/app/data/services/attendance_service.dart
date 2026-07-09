@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 import 'package:clevora/app/routes/api.dart';
@@ -25,7 +25,7 @@ class AttendanceService extends GetxService {
     socket!.connect();
     
     socket!.onConnect((_) {
-      print('Connected to Socket.IO');
+      debugPrint('Connected to Socket.IO');
       socket!.emit('join_kelas', kelasId);
     });
     
@@ -37,7 +37,7 @@ class AttendanceService extends GetxService {
       onAttendanceUpdated(data);
     });
     
-    socket!.onDisconnect((_) => print('Disconnected from Socket.IO'));
+    socket!.onDisconnect((_) => debugPrint('Disconnected from Socket.IO'));
   }
 
   void disconnectSocket() {

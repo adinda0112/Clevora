@@ -126,6 +126,7 @@ class LoginController extends GetxController {
           "Login Google dibatalkan",
           snackPosition: SnackPosition.BOTTOM,
         );
+        isGoogleLoading.value = false;
         return;
       }
 
@@ -161,14 +162,7 @@ class LoginController extends GetxController {
       // Redirect ke halaman sesuai role
       final userRole = user.role.isNotEmpty ? user.role : selectedRole.value;
 
-      bool isIncomplete = false;
-      if (userRole == 'guru') {
-        isIncomplete = (user.nip == null || user.nip!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty);
-      } else {
-        isIncomplete = (user.nisn == null || user.nisn!.isEmpty || user.kelas == null || user.kelas!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty);
-      }
-
-      if (isIncomplete) {
+      if (!user.isProfileComplete) {
         Get.offAllNamed(Routes.COMPLETE_PROFILE);
       } else {
         if (userRole == 'guru') {

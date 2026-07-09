@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:gap/gap.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/student/exam_instruction/controllers/exam_instruction_controller.dart';
+import 'package:clevora/app/widgets/debouncer.dart';
 
 class ExamInstructionView extends GetView<ExamInstructionController> {
   const ExamInstructionView({super.key});
@@ -97,7 +98,7 @@ class ExamInstructionView extends GetView<ExamInstructionController> {
               width: double.infinity,
               height: 48,
               child: Obx(() => ElevatedButton(
-                onPressed: controller.isChecked.value && !controller.isLoading.value ? controller.startExam : null,
+                onPressed: controller.isChecked.value && !controller.isLoading.value ? Debouncer.wrap(controller.startExam, tag: 'start_exam') : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryPurple,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

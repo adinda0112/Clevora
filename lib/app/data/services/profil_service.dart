@@ -46,4 +46,16 @@ class ProfilService extends GetxService {
       rethrow;
     }
   }
+
+  Future<List<dynamic>> getLogs() async {
+    try {
+      final response = await _apiProvider.dio.get('/logs');
+      if (response.data != null && response.data['success'] == true) {
+        return response.data['data'] as List<dynamic>;
+      }
+      throw Exception(response.data?['message'] ?? 'Gagal mengambil log keamanan');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

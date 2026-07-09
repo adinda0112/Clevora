@@ -165,6 +165,32 @@ class AuthService extends GetxService {
     }
   }
 
+  Future<bool> forgotPassword({required String email}) async {
+    try {
+      final response = await _authRepository.forgotPassword(email);
+      return response['success'] ?? false;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _authRepository.resetPassword(email, otp, newPassword);
+      return response['success'] ?? false;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   Future<UserModel?> getMe() async {
     try {
       final response = await _apiProvider.dio.get('/auth/me');
@@ -228,18 +254,10 @@ class AuthService extends GetxService {
   }
 
   void _navigateBasedOnRole(UserModel user) {
-    if (user.role == 'guru') {
-      if (user.nip == null || user.nip!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty) {
-        Get.offAllNamed(Routes.COMPLETE_PROFILE);
-      } else {
-        Get.offAllNamed(Routes.TEACHER_MAIN);
-      }
+    if (!user.isProfileComplete) {
+      Get.offAllNamed(Routes.COMPLETE_PROFILE);
     } else {
-      if (user.nisn == null || user.nisn!.isEmpty || user.kelas == null || user.kelas!.isEmpty || user.sekolah == null || user.sekolah!.isEmpty) {
-        Get.offAllNamed(Routes.COMPLETE_PROFILE);
-      } else {
-        Get.offAllNamed(Routes.STUDENT_MAIN);
-      }
+      Get.offAllNamed(user.role == 'guru' ? Routes.TEACHER_MAIN : Routes.STUDENT_MAIN);
     }
   }
 

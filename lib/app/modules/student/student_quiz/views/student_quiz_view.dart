@@ -19,19 +19,18 @@ class StudentQuizView extends GetView<StudentQuizController> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.darkPurple),
-          onPressed: () => Get.back(),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Obx(() {
+        final filters = ['Semua', 'Pretest', 'Posttest', 'Ujian'];
+
         if (controller.isLoading.value) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.primaryPurple),
           );
         }
 
-        if (controller.quizzes.isEmpty) {
+        if (controller.filteredQuizzes.isEmpty && controller.activeFilter.value == 'Semua') {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(32.0),
@@ -71,14 +70,62 @@ class StudentQuizView extends GetView<StudentQuizController> {
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: controller.fetchQuizzes,
-          color: AppColors.primaryPurple,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: controller.quizzes.length,
-            itemBuilder: (context, index) {
-              final quiz = controller.quizzes[index];
+        return Column(
+          children: [
+            // Filter Chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: filters.map((filter) {
+                  final isActive = controller.activeFilter.value == filter;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(
+                        filter,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : AppColors.grey700,
+                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      selected: isActive,
+                      selectedColor: AppColors.primaryPurple,
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isActive ? AppColors.primaryPurple : AppColors.grey300,
+                        ),
+                      ),
+                      onSelected: (selected) {
+                        if (selected) {
+                          controller.activeFilter.value = filter;
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            
+            // List Kuis
+            Expanded(
+              child: controller.filteredQuizzes.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tidak ada kuis untuk filter ${controller.activeFilter.value}',
+                      style: const TextStyle(color: AppColors.grey600),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: controller.fetchQuizzes,
+                    color: AppColors.primaryPurple,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: controller.filteredQuizzes.length,
+                      itemBuilder: (context, index) {
+                        final quiz = controller.filteredQuizzes[index];
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
@@ -236,8 +283,10 @@ class StudentQuizView extends GetView<StudentQuizController> {
               );
             },
           ),
-        );
-      }),
-    );
-  }
+        ),
+      ),
+    ]);
+  })
+);
+}
 }

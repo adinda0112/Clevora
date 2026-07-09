@@ -1,43 +1,12 @@
 import 'package:get/get.dart';
-import 'package:clevora/app/data/providers/api_provider.dart';
-
-class SecurityLogModel {
-  final String id;
-  final String action;
-  final String endpoint;
-  final String ipAddress;
-  final String status;
-  final DateTime createdAt;
-  final String? userAgent;
-
-  SecurityLogModel({
-    required this.id,
-    required this.action,
-    required this.endpoint,
-    required this.ipAddress,
-    required this.status,
-    required this.createdAt,
-    this.userAgent,
-  });
-
-  factory SecurityLogModel.fromJson(Map<String, dynamic> json) {
-    return SecurityLogModel(
-      id: json['_id'] ?? '',
-      action: json['action'] ?? '',
-      endpoint: json['endpoint'] ?? '',
-      ipAddress: json['ipAddress'] ?? '',
-      status: json['status'] ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']).toLocal() : DateTime.now(),
-      userAgent: json['userAgent'],
-    );
-  }
-}
+import 'package:clevora/app/data/services/profil_service.dart';
 
 class SecurityLogController extends GetxController {
-  final ApiProvider _apiProvider = Get.find<ApiProvider>();
-  
-  final logs = <SecurityLogModel>[].obs;
-  final isLoading = false.obs;
+  final ProfilService _profilService = Get.find<ProfilService>();
+
+  final logs = <dynamic>[].obs;
+  final isLoading = true.obs;
+  final errorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -46,15 +15,13 @@ class SecurityLogController extends GetxController {
   }
 
   Future<void> fetchLogs() async {
-    isLoading.value = true;
     try {
-      final response = await _apiProvider.dio.get('/logs');
-      if (response.statusCode == 200) {
-        final data = response.data['data'] as List;
-        logs.value = data.map((e) => SecurityLogModel.fromJson(e)).toList();
-      }
+      isLoading.value = true;
+      errorMessage.value = '';
+      final fetchedLogs = await _profilService.getLogs();
+      logs.assignAll(fetchedLogs);
     } catch (e) {
-      Get.snackbar('Error', 'Gagal memuat log keamanan');
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
     }

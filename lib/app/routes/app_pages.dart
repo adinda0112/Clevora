@@ -13,6 +13,9 @@ import 'package:clevora/app/modules/auth/otp/bindings/otp_binding.dart';
 import 'package:clevora/app/modules/auth/otp/views/otp_view.dart';
 import 'package:clevora/app/modules/auth/complete_profile/bindings/complete_profile_binding.dart';
 import 'package:clevora/app/modules/auth/complete_profile/views/complete_profile_view.dart';
+import 'package:clevora/app/modules/auth/forgot_password/bindings/forgot_password_binding.dart';
+import 'package:clevora/app/modules/auth/forgot_password/views/forgot_password_view.dart';
+import 'package:clevora/app/modules/auth/forgot_password/views/reset_password_view.dart';
 
 // Teacher
 import 'package:clevora/app/modules/teacher/teacher_main/bindings/teacher_main_binding.dart';
@@ -77,6 +80,8 @@ class AppPages {
     GetPage(name: Routes.REGISTER, page: () => const RegisterView(), binding: RegisterBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.COMPLETE_PROFILE, page: () => const CompleteProfileView(), binding: CompleteProfileBinding(), transition: Transition.rightToLeft),
     GetPage(name: Routes.OTP, page: () => const OtpView(), binding: OtpBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.FORGOT_PASSWORD, page: () => const ForgotPasswordView(), binding: ForgotPasswordBinding(), transition: Transition.rightToLeft),
+    GetPage(name: Routes.RESET_PASSWORD, page: () => const ResetPasswordView(), binding: ForgotPasswordBinding(), transition: Transition.rightToLeft),
     
     // Teacher
     GetPage(name: Routes.TEACHER_MAIN, page: () => const TeacherMainView(), binding: TeacherMainBinding(), transition: Transition.fadeIn),

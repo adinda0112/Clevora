@@ -76,6 +76,14 @@ class UserModel {
       'jurusan': jurusan,
     };
   }
+
+  bool get isProfileComplete {
+    if (role == 'guru') {
+      return nip != null && nip!.isNotEmpty && sekolah != null && sekolah!.isNotEmpty;
+    } else {
+      return nisn != null && nisn!.isNotEmpty && kelas != null && kelas!.isNotEmpty && sekolah != null && sekolah!.isNotEmpty;
+    }
+  }
 }
 
 class AuthResponse {

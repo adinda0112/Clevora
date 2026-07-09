@@ -1,3 +1,4 @@
 class Api {
-  static const String baseUrl = 'https://trapdoor-idealism-bath.ngrok-free.dev/api';
+  static const String baseUrl = 'https://clevora-backend.vercel.app/api';
+  static const String socketUrl = 'https://clevora-backend.vercel.app';
 }

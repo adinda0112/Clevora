@@ -5,6 +5,7 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/modules/student/learning/controllers/learning_controller.dart';
 import 'package:clevora/app/data/models/module_model.dart';
 import 'package:clevora/app/modules/student/student_main/controllers/student_main_controller.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class LearningView extends GetView<LearningController> {
   const LearningView({super.key});
@@ -21,16 +22,7 @@ class LearningView extends GetView<LearningController> {
         backgroundColor: AppColors.darkPurple,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (Get.isRegistered<StudentMainController>()) {
-              Get.find<StudentMainController>().changePage(0);
-            } else {
-              Get.back();
-            }
-          },
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.fetchModules(),
@@ -290,12 +282,18 @@ class ModuleReaderPage extends StatelessWidget {
             const Gap(16),
             const Divider(),
             const Gap(16),
-            Text(
-              module.konten,
-              style: const TextStyle(
-                fontSize: 15,
-                height: 1.6,
-                color: Color(0xFF374151),
+            MarkdownBody(
+              data: module.konten,
+              selectable: true,
+              styleSheet: MarkdownStyleSheet(
+                p: const TextStyle(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: Color(0xFF374151),
+                ),
+                h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.grey900),
+                h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.grey900),
+                h3: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.grey900),
               ),
             ),
             const Gap(32),

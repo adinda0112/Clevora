@@ -15,6 +15,7 @@ import 'package:clevora/app/data/services/hasil_service.dart';
 import 'package:clevora/app/data/services/profil_service.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 import 'package:clevora/app/data/repositories/auth_repository.dart';
+import 'package:clevora/app/data/models/user_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
@@ -49,23 +50,13 @@ String getInitialRoute() {
   }
 
   try {
-    final role = userMap['role'] as String?;
-    if (role == 'guru') {
-      final nip = userMap['nip'] as String?;
-      final sekolah = userMap['sekolah'] as String?;
-      if (nip == null || nip.isEmpty || sekolah == null || sekolah.isEmpty) {
-        return Routes.COMPLETE_PROFILE;
-      }
-      return Routes.TEACHER_MAIN;
-    } else {
-      final nisn = userMap['nisn'] as String?;
-      final kelas = userMap['kelas'] as String?;
-      final sekolah = userMap['sekolah'] as String?;
-      if (nisn == null || nisn.isEmpty || kelas == null || kelas.isEmpty || sekolah == null || sekolah.isEmpty) {
-        return Routes.COMPLETE_PROFILE;
-      }
-      return Routes.STUDENT_MAIN;
+    final user = UserModel.fromJson(userMap);
+    
+    if (!user.isProfileComplete) {
+      return Routes.COMPLETE_PROFILE;
     }
+    
+    return user.role == 'guru' ? Routes.TEACHER_MAIN : Routes.STUDENT_MAIN;
   } catch (e) {
     return AppPages.INITIAL;
   }

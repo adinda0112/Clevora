@@ -24,7 +24,11 @@ class CompleteProfileController extends GetxController {
   ];
 
   final selectedMapel = 'Informatika'.obs;
-  final mapelOptions = ['Informatika', 'Matematika', 'Bahasa Inggris', 'Fisika'];
+  final mapelOptions = [
+    'Informatika', 'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi', 
+    'Biologi', 'Fisika', 'Sejarah', 'PJOK', 'Prakarya dan Kewirausahaan', 
+    'Pendidikan Agama Islam', 'Seni Budaya', 'Bahasa Jawa', 'Kimia'
+  ];
 
   @override
   void onInit() {

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/theme/app_theme.dart';
+import 'package:clevora/app/data/utils/validation_helper.dart';
 import 'package:clevora/app/modules/auth/register/controllers/register_controller.dart';
 
 class RegisterView extends GetView<RegisterController> {
@@ -385,12 +386,7 @@ class _Step1DataForm extends StatelessWidget {
                   const Gap(8),
                   TextFormField(
                     controller: controller.nipController,
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) return 'NIP wajib diisi';
-                      if (val.trim().length != 18) return 'NIP harus terdiri dari 18 angka';
-                      if (int.tryParse(val.trim()) == null) return 'NIP hanya boleh berisi angka';
-                      return null;
-                    },
+                    validator: ValidationHelper.validateNip,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       hintText: 'Nomor Induk Pegawai (18 angka)',

@@ -4,108 +4,94 @@ Clevora adalah platform pendidikan digital pintar yang dirancang khusus untuk me
 
 ---
 
-## 📁 Struktur Folder Project
+## 🌟 Fitur Utama
 
-Aplikasi Clevora terbagi secara terpisah menjadi **Frontend (Flutter)** dan **Backend (Express)**.
+- **Otentikasi Aman**: Login & Register Multi-role (Guru / Siswa) + integrasi Google Sign-In.
+- **Generative AI (Guru)**: Pembuatan materi ajar, modul, dan kuis secara otomatis menggunakan integrasi Gemini AI Studio.
+- **Manajemen Kuis (Guru)**: Buat, edit, dan bagikan kuis ke kelas yang spesifik, serta pantau laporan nilai siswa.
+- **Sistem Proctoring (Siswa)**: Ujian diawasi secara real-time via kamera untuk mendeteksi kecurangan.
+- **Pendeteksi Wajah (Face Service)**: Pendaftaran wajah saat registrasi pertama kali dan verifikasi wajah saat pre-test/post-test.
+- **Absensi Pintar**: Generate kode QR dan pindai untuk kehadiran berbasis lokasi (Geotagging + Socket.io realtime update).
+- **Dashboard & Analisis**: Ringkasan data performa siswa, kehadiran, dan laporan lengkap.
 
-### 1. Frontend Directory Layout (`c:\clevora`)
+---
+
+## 🛠 Tech Stack
+
+**Frontend:**
+- **Framework:** Flutter (^3.11.4)
+- **State Management & Routing:** GetX (^4.6.6)
+- **Networking:** Dio (^5.4.0)
+- **Storage:** GetStorage & Flutter Secure Storage
+- **UI/UX:** Google Fonts, Flutter Animate
+
+**Backend (API Repo Terpisah):**
+- **Framework:** Express.js (Node.js)
+- **Database:** MongoDB (Mongoose)
+- **AI Integration:** Google Gemini API
+- **Realtime:** Socket.io
+
+---
+
+## 📁 Struktur Folder Project (Frontend)
+
+Proyek ini dibangun menggunakan **GetX Pattern** untuk memisahkan UI, Logic, dan Data Layer dengan bersih.
+
 ```
 lib/
 ├── app/
 │   ├── data/
-│   │   ├── models/           # Mapping JSON Response dari API ke Objek Dart
-│   │   │   ├── module_model.dart
-│   │   │   ├── question_model.dart
-│   │   │   ├── quiz_model.dart
-│   │   │   └── user_model.dart
-│   │   ├── providers/        # Konfigurasi Http Client (Dio) & Base URL
-│   │   │   └── api_provider.dart
-│   │   └── services/         # Penghubung langsung Flutter ke endpoint REST API
-│   │       ├── auth_service.dart
-│   │       ├── module_service.dart
-│   │       └── quiz_service.dart
-│   ├── modules/              # Modul fitur berbasis GetX (View - Controller - Binding)
-│   │   ├── auth/             # Modul Login & Register
-│   │   ├── student/          # Fitur Siswa (Daftar Kuis, Ujian Proctoring, Hasil)
-│   │   │   ├── student_exam/
-│   │   │   │   ├── controllers/student_exam_controller.dart # Logika Sensor Peringatan
-│   │   │   │   └── views/student_exam_view.dart             # UI Proctoring & Ujian
-│   │   │   ├── student_quiz/
-│   │   │   └── student_result/
-│   │   └── teacher/          # Fitur Guru (Dashboard, AI Generate, Quiz Management)
-│   │       ├── ai_generate/
-│   │       │   ├── controllers/ai_result_controller.dart    # Parser Kuis Markdown AI
-│   │       │   └── views/ai_result_view.dart                # Visualisasi Render Markdown
-│   │       ├── dashboard/
-│   │       └── quiz_management/
+│   │   ├── models/           # Mapping JSON Response dari API ke Objek Dart (UserModel, QuizModel, dll)
+│   │   ├── providers/        # Konfigurasi Http Client (Dio interceptors & Base URL)
+│   │   ├── repositories/     # Abstraksi endpoint spesifik (misal: AuthRepository)
+│   │   ├── services/         # Global Services (AuthService, ModuleService, dll)
+│   │   └── utils/            # Helper function (ValidationHelper)
+│   ├── modules/              # Fitur aplikasi (GetX: View, Controller, Binding)
+│   │   ├── auth/             # Modul Login, Register, Lengkapi Profil, Lupa Password
+│   │   ├── shared/           # Modul untuk semua role (Profil, Video Player, Security Log)
+│   │   ├── student/          # Modul Siswa (Belajar, Kuis, QR Scanner, Proctoring Ujian)
+│   │   └── teacher/          # Modul Guru (Dashboard, AI Generate, Quiz Management, Absensi)
 │   ├── routes/               # Manajemen Routing & Navigasi Halaman
-│   │   ├── app_pages.dart
-│   │   └── app_routes.dart
-│   └── theme/                # Palet Warna Utama (HSL Purple, Dark, Grey50)
-│       └── app_theme.dart
-└── main.dart                 # Entry point aplikasi Flutter & Inisialisasi Service Global
-```
-
-### 2. Backend Directory Layout (`c:\clevora-backend`)
-```
-src/
-├── config/                   # Konfigurasi Koneksi Database (MongoDB Mongoose)
-│   └── db.js
-├── controllers/              # Logika Utama Handler Permintaan API
-│   ├── aiController.js       # Komunikasi dengan Gemini API & Generator Prompts
-│   ├── authController.js     # Otentikasi, JWT Sign-In, & Registrasi
-│   ├── quizController.js     # CRUD Kuis & Auto-Grading (Penilaian Otomatis)
-│   └── modulController.js
-├── middleware/               # Keamanan (Auth Token Verification & Access Control)
-│   ├── authMiddleware.js     # Verifikator signature JWT token
-│   └── roleMiddleware.js     # Pembatas Hak Akses (Guru/Siswa)
-├── models/                   # Definisi Skema Mongoose (MongoDB Collections)
-│   ├── User.js
-│   ├── Module.js
-│   ├── Quiz.js
-│   ├── Question.js
-│   └── Result.js
-├── routes/                   # Definisi Struktur Endpoint RESTful API
-│   ├── auth.routes.js
-│   ├── ai.routes.js
-│   ├── kuis.routes.js
-│   └── modul.routes.js
-├── app.js                    # Inisialisasi Express, CORS, & Middleware Global
-└── server.js                 # Entry point Server API Backend (Port 5000)
+│   │   ├── api.dart          # Base URL konfigurasi
+│   │   ├── app_pages.dart    # Daftar GetPage
+│   │   └── app_routes.dart   # Konstanta nama route
+│   ├── theme/                # Palet Warna & Konfigurasi Google Fonts
+│   └── widgets/              # Reusable UI Components (Button, Dialog, Bottom Nav)
+└── main.dart                 # Entry point & Inisialisasi Dependensi Global
 ```
 
 ---
 
-
 ## 🚀 Cara Menjalankan Project
 
 ### 1. Menjalankan Backend API
-1. Buka terminal di direktori backend:
-   ```bash
-   cd c:\clevora-backend
-   ```
-2. Pastikan file `.env` telah dikonfigurasi dengan benar:
+
+Repositori backend terpisah (`c:\clevora-backend`).
+1. `cd c:\clevora-backend`
+2. Konfigurasi file `.env`:
    ```env
    PORT=5000
    MONGO_URI=mongodb+srv://... (Koneksi MongoDB Atlas Cloud)
    JWT_SECRET=... (Secret key token)
    GEMINI_API_KEY=... (API Key dari Google AI Studio)
    ```
-3. Instal dependensi dan jalankan server dalam mode development:
+3. Instal dependensi dan jalankan server:
    ```bash
    npm install
    npm run dev
    ```
-4. Backend akan berjalan di: `http://localhost:5000`.
 
 ### 2. Menjalankan Frontend Flutter
-1. Buka terminal baru di direktori frontend:
+
+1. Buka terminal di direktori frontend:
    ```bash
    cd c:\clevora
    ```
-2. Pastikan emulator Android atau perangkat fisik telah terhubung.
-3. Jalankan perintah instalasi paket dan jalankan aplikasi:
+2. Instal dependensi:
    ```bash
    flutter pub get
+   ```
+3. Jalankan aplikasi (pastikan emulator / perangkat fisik terhubung):
+   ```bash
    flutter run
    ```

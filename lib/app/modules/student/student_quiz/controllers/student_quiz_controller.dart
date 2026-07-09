@@ -12,6 +12,21 @@ class StudentQuizController extends GetxController {
   final completedQuizIds = <String>{}.obs;
   final resultDataMap = <String, Map<String, dynamic>>{}.obs;
 
+  final activeFilter = 'Semua'.obs;
+
+  List<QuizModel> get filteredQuizzes {
+    if (activeFilter.value == 'Semua') {
+      return quizzes;
+    }
+    return quizzes.where((q) {
+      final judulLower = q.judul.toLowerCase();
+      if (activeFilter.value == 'Pretest') return judulLower.contains('pretest');
+      if (activeFilter.value == 'Posttest') return judulLower.contains('posttest');
+      if (activeFilter.value == 'Ujian') return judulLower.contains('ujian') || judulLower.contains('uts') || judulLower.contains('uas');
+      return true;
+    }).toList();
+  }
+
   @override
   void onInit() {
     super.onInit();

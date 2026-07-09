@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:clevora/app/data/models/module_model.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart' as dio;
 
 class ModuleService extends GetxService {
@@ -172,7 +173,7 @@ class ModuleService extends GetxService {
         return response.statusCode == 200;
       }
     } catch (e) {
-      print('Gagal update history AI (Bisa diabaikan jika Modul utama tersimpan): $e');
+      debugPrint('Gagal update history AI (Bisa diabaikan jika Modul utama tersimpan): $e');
       return false;
     }
   }

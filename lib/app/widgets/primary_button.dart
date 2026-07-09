@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:clevora/app/theme/app_theme.dart';
 
+import 'package:clevora/app/widgets/debouncer.dart';
+
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -29,7 +31,7 @@ class PrimaryButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
+          onTap: Debouncer.wrap(onPressed, tag: label),
           borderRadius: BorderRadius.circular(12),
           child: Center(
             child: Row(

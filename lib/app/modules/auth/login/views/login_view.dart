@@ -178,7 +178,7 @@ class LoginView extends GetView<LoginController> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () => Get.toNamed(Routes.FORGOT_PASSWORD),
                           child: Text(
                             'Lupa kata sandi?',
                             style: Theme.of(context).textTheme.bodySmall

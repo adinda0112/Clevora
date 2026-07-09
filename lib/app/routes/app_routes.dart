@@ -33,4 +33,7 @@ abstract class Routes {
   static const STUDENT_QR_SCANNER = '/student-qr-scanner';
   
   static const VIDEO_PLAYER = '/video-player';
+  
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const RESET_PASSWORD = '/reset-password';
 }

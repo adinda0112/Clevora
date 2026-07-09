@@ -26,7 +26,7 @@ class RegisterController extends GetxController {
 
   final selectedMapel = <String>[].obs;
   final mapelOptions = [
-    'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi', 
+    'Informatika', 'Bahasa Indonesia', 'Matematika', 'Bahasa Inggris', 'Sosiologi', 'Ekonomi', 
     'Biologi', 'Fisika', 'Sejarah', 'PJOK', 'Prakarya dan Kewirausahaan', 
     'Pendidikan Agama Islam', 'Seni Budaya', 'Bahasa Jawa', 'Kimia'
   ];

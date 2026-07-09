@@ -194,14 +194,16 @@ class EditProfileView extends GetView<EditProfileController> {
                     const SizedBox(height: 20),
                     const Align(alignment: Alignment.centerLeft, child: Text('Mata Pelajaran', style: TextStyle(fontWeight: FontWeight.w600))),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: controller.mapelController,
+                    Obx(() => DropdownButtonFormField<String>(
+                      value: controller.selectedMapel.value.isNotEmpty ? controller.selectedMapel.value : null,
                       decoration: InputDecoration(
-                        hintText: 'Mata Pelajaran (Contoh: Informatika)',
+                        hintText: 'Pilih Mata Pelajaran',
                         filled: true, fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                       ),
-                    ),
+                      items: controller.mapelOptions.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+                      onChanged: (v) => controller.selectedMapel.value = v ?? '',
+                    )),
                   ] else ...[
                     const Align(alignment: Alignment.centerLeft, child: Text('NISN', style: TextStyle(fontWeight: FontWeight.w600))),
                     const SizedBox(height: 8),

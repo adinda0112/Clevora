@@ -36,6 +36,8 @@ class QuizManagementView extends GetView<QuizManagementController> {
         ),
       ),
       body: Obx(() {
+        final filters = ['Semua', 'Pretest', 'Posttest', 'Ujian'];
+
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -57,7 +59,7 @@ class QuizManagementView extends GetView<QuizManagementController> {
           );
         }
 
-        if (controller.quizzes.isEmpty) {
+        if (controller.filteredQuizzes.isEmpty && controller.activeFilter.value == 'Semua') {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -83,13 +85,61 @@ class QuizManagementView extends GetView<QuizManagementController> {
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: controller.fetchQuizzes,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.quizzes.length,
-            itemBuilder: (context, index) {
-              final quiz = controller.quizzes[index];
+        return Column(
+          children: [
+            // Filter Chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: filters.map((filter) {
+                  final isActive = controller.activeFilter.value == filter;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(
+                        filter,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.grey[700],
+                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      selected: isActive,
+                      selectedColor: const Color.fromARGB(255, 60, 52, 137),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isActive ? const Color.fromARGB(255, 60, 52, 137) : Colors.grey.shade300,
+                        ),
+                      ),
+                      onSelected: (selected) {
+                        if (selected) {
+                          controller.activeFilter.value = filter;
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            
+            // List Kuis
+            Expanded(
+              child: controller.filteredQuizzes.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tidak ada kuis untuk filter ${controller.activeFilter.value}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: controller.fetchQuizzes,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.filteredQuizzes.length,
+                      itemBuilder: (context, index) {
+                        final quiz = controller.filteredQuizzes[index];
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
@@ -165,9 +215,12 @@ class QuizManagementView extends GetView<QuizManagementController> {
               );
             },
           ),
-        );
-      }),
+        ),
+      ),
+    ]);
+  }),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_quiz_management',
         onPressed: () => _showCreateOptions(context),
         backgroundColor: const Color.fromARGB(255, 60, 52, 137),
         icon: const Icon(Icons.add, color: Colors.white),

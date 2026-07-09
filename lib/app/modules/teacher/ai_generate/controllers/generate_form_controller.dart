@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:file_picker/file_picker.dart';
@@ -51,18 +52,17 @@ class GenerateFormController extends GetxController {
       generateType.value = args['type'] ?? 'Modul';
     }
 
-    // Try to get mapel from logged in user
+    // Lock mapel to the teacher's own subject
     try {
       final authService = Get.find<AuthService>();
       final user = authService.currentUser.value;
       if (user != null && user.mapel != null && user.mapel!.isNotEmpty) {
-        if (!mapelOptions.contains(user.mapel!)) {
-          mapelOptions.add(user.mapel!); // Add if not exists
-        }
+        // Only show the teacher's own mapel
+        mapelOptions.assignAll([user.mapel!]);
         mataPelajaran.value = user.mapel!;
       }
     } catch (e) {
-      print('Could not find auth service for mapel');
+      debugPrint('Could not find auth service for mapel');
     }
   }
 

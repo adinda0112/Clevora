@@ -14,6 +14,19 @@ class StudentHomeController extends GetxController {
   final searchQuery = ''.obs;
   final isStatsLoading = false.obs;
 
+  String get greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Selamat Pagi 🌅';
+    } else if (hour < 15) {
+      return 'Selamat Siang ☀️';
+    } else if (hour < 18) {
+      return 'Selamat Sore 🌇';
+    } else {
+      return 'Selamat Malam 🌙';
+    }
+  }
+
   final stats = <Map<String, dynamic>>[
     {
       'title': 'Tugas Selesai',

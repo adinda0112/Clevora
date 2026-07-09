@@ -76,23 +76,26 @@ class OtpView extends GetView<OtpController> {
                 const Gap(32),
 
                 // Info Box
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightPurple,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Masukkan 6 digit kode yang kami kirim untuk memverifikasi email Anda',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primaryPurple,
-                        ),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightPurple,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Masukkan 6 digit kode yang kami kirim untuk memverifikasi email Anda',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.primaryPurple,
+                          ),
+                    ),
                   ),
                 ),
                 const Gap(32),
 
                 // OTP Input
-                _buildPinput(context),
+                Center(child: _buildPinput(context)),
                 const Gap(24),
 
                 // Countdown Timer
@@ -225,6 +228,15 @@ class OtpView extends GetView<OtpController> {
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
       submittedPinTheme: submittedPinTheme,
+      showCursor: true,
+      cursor: Container(
+        width: 2,
+        height: 24,
+        decoration: BoxDecoration(
+          color: AppColors.primaryPurple,
+          borderRadius: BorderRadius.circular(1),
+        ),
+      ),
       onChanged: (value) => controller.otpCode.value = value,
       onCompleted: (pin) => controller.otpCode.value = pin,
     );
