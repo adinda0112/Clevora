@@ -64,25 +64,6 @@ lib/
 
 ## 🚀 Cara Menjalankan Project
 
-### 1. Menjalankan Backend API
-
-Repositori backend terpisah (`c:\clevora-backend`).
-1. `cd c:\clevora-backend`
-2. Konfigurasi file `.env`:
-   ```env
-   PORT=5000
-   MONGO_URI=mongodb+srv://... (Koneksi MongoDB Atlas Cloud)
-   JWT_SECRET=... (Secret key token)
-   GEMINI_API_KEY=... (API Key dari Google AI Studio)
-   ```
-3. Instal dependensi dan jalankan server:
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-### 2. Menjalankan Frontend Flutter
-
 1. Buka terminal di direktori frontend:
    ```bash
    cd c:\clevora
