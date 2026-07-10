@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
-import 'package:clevora/app/widgets/camera_dialog.dart';
+import 'package:clevora/app/widgets/smart_camera_dialog.dart';
 
 class OtpController extends GetxController {
   final otpCode = ''.obs;
@@ -73,7 +73,7 @@ class OtpController extends GetxController {
             // Prompt face registration for new siswa
             if (!user.sudahDaftarWajah) {
               await Get.dialog<bool>(
-                const CameraDialog(
+                const SmartCameraDialog(
                   title: 'Daftarkan Wajah',
                   isRegistration: true,
                 ),

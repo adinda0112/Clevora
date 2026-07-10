@@ -63,12 +63,14 @@ class FaceService extends GetxService {
   /// Send live exam proctoring frame
   Future<Map<String, dynamic>> sendProctorFrame(
     String resultId,
-    String imagePath,
-  ) async {
+    String imagePath, {
+    String? violationType,
+  }) async {
     try {
       final fileName = imagePath.split('/').last;
       final formData = FormData.fromMap({
         'resultId': resultId,
+        if (violationType != null) 'violationType': violationType,
         'image': await MultipartFile.fromFile(
           imagePath,
           filename: fileName,

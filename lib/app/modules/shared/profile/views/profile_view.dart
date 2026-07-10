@@ -259,7 +259,7 @@ class ProfileView extends GetView<ProfileController> {
                   },
                   icon: const Icon(Icons.logout, color: Colors.white),
                   label: const Text(
-                    'Logout',
+                    'Keluar',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),

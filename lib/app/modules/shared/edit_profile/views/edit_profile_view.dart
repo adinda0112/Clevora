@@ -14,7 +14,7 @@ class EditProfileView extends GetView<EditProfileController> {
 
       appBar: AppBar(
         title: const Text(
-          'Edit Profile',
+          'Ubah Profil',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color.fromARGB(255, 60, 52, 137),
@@ -106,7 +106,7 @@ class EditProfileView extends GetView<EditProfileController> {
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Full Name',
+                'Nama Lengkap',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ),

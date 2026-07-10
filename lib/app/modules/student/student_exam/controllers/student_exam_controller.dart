@@ -9,6 +9,8 @@ import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/data/services/face_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/theme/app_theme.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 class StudentExamController extends GetxController with WidgetsBindingObserver {
   final QuizService _quizService = Get.find<QuizService>();
@@ -32,11 +34,25 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
   bool isProctoringActive = false;
   String resultId = '';
 
+  late final FaceDetector _faceDetector;
+  late final PoseDetector _poseDetector;
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     
+    _faceDetector = FaceDetector(
+      options: FaceDetectorOptions(
+        enableClassification: false,
+        enableContours: false,
+        enableLandmarks: false,
+        enableTracking: false,
+        performanceMode: FaceDetectorMode.fast,
+      ),
+    );
+    _poseDetector = PoseDetector(options: PoseDetectorOptions());
+
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null) {
       final quizObj = args['quiz'] as QuizModel?;
@@ -66,6 +82,8 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
     _timer?.cancel();
     _proctorTimer?.cancel();
     cameraController?.dispose();
+    _faceDetector.close();
+    _poseDetector.close();
     super.onClose();
   }
 
@@ -108,6 +126,49 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
         final image = await cameraController!.takePicture();
         final file = File(image.path);
         
+        // --- Local AI Processing with ML Kit ---
+        String? violationType;
+        
+        try {
+          final inputImage = InputImage.fromFilePath(image.path);
+          
+          // 1. Detect Faces
+          final faces = await _faceDetector.processImage(inputImage);
+          
+          if (faces.isEmpty) {
+            violationType = 'wajah_tidak_ada';
+          } else if (faces.length > 1) {
+            violationType = 'multi_wajah';
+          } else {
+            final face = faces.first;
+            // Cek menoleh (Euler Y - left/right rotation)
+            final eulerY = face.headEulerAngleY ?? 0.0;
+            if (eulerY.abs() > 25.0) { // Toleransi kemiringan kepala
+              violationType = 'menoleh';
+            }
+          }
+
+          // 2. Detect Hands if no face violation
+          if (violationType == null) {
+            final poses = await _poseDetector.processImage(inputImage);
+            if (poses.isNotEmpty) {
+              final pose = poses.first;
+              final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+              final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+              
+              // Jika kedua pergelangan tangan terdeteksi di dalam layar kamera ujian
+              bool leftHandVisible = leftWrist != null && leftWrist.likelihood > 0.7;
+              bool rightHandVisible = rightWrist != null && rightWrist.likelihood > 0.7;
+              
+              if (leftHandVisible && rightHandVisible) {
+                 violationType = 'dua_tangan';
+              }
+            }
+          }
+        } catch (e) {
+          Get.log('ML Kit processing error: $e');
+        }
+
         // Compress frame to reduce bandwidth and latency
         final compressedFile = await FlutterImageCompress.compressAndGetFile(
           file.absolute.path,
@@ -119,8 +180,12 @@ class StudentExamController extends GetxController with WidgetsBindingObserver {
 
         if (compressedFile == null) return;
 
-        // Send frame to backend
-        final result = await _faceService.sendProctorFrame(resultId, compressedFile.path);
+        // Send frame to backend with the detected violation
+        final result = await _faceService.sendProctorFrame(
+          resultId, 
+          compressedFile.path,
+          violationType: violationType,
+        );
 
         // Delete temporary captured file on local storage to save space
         if (file.existsSync()) {

@@ -29,22 +29,7 @@ class TeacherMainView extends GetView<TeacherMainController> {
           children: pages,
         ),
       ),
-      floatingActionButton: Obx(() {
-        // Show FAB only on Home (index 0) or Module AI (index 1)
-        if (controller.currentIndex.value == 0 || controller.currentIndex.value == 1) {
-          return FloatingActionButton.extended(
-            heroTag: 'fab_teacher_main',
-            onPressed: () {
-              Get.toNamed('/generate-form', arguments: {'type': 'Modul'});
-            },
-            backgroundColor: const Color.fromARGB(255, 60, 52, 137),
-            icon: const Icon(Icons.auto_awesome, color: Colors.white),
-            label: const Text('Generate Cepat',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          );
-        }
-        return const SizedBox.shrink();
-      }),
+
       bottomNavigationBar: Obx(
         () => TeacherBottomNav(
           currentIndex: controller.currentIndex.value,

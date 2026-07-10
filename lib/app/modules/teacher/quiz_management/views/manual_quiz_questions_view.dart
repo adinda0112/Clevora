@@ -5,7 +5,8 @@ import 'package:clevora/app/theme/app_theme.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 
-// Local model for a question being built
+part '../widgets/question_card.dart';
+
 class _QuestionDraft {
   String pertanyaan;
   List<String> pilihan;
@@ -20,6 +21,8 @@ class _QuestionDraft {
 }
 
 class ManualQuizQuestionsView extends StatefulWidget {
+  static const List<String> labels = ['A', 'B', 'C', 'D'];
+
   const ManualQuizQuestionsView({super.key});
 
   @override
@@ -38,8 +41,6 @@ class _ManualQuizQuestionsViewState extends State<ManualQuizQuestionsView> {
     'XI IPA 1', 'XI IPA 2', 'XI IPS 1', 'XI IPS 2',
     'XII IPA 1', 'XII IPA 2', 'XII IPS 1', 'XII IPS 2',
   ];
-
-  static const List<String> _labels = ['A', 'B', 'C', 'D'];
 
   @override
   void initState() {
@@ -83,7 +84,7 @@ class _ManualQuizQuestionsViewState extends State<ManualQuizQuestionsView> {
       for (int j = 0; j < 4; j++) {
         if (q.pilihan[j].trim().isEmpty) {
           Get.snackbar('Validasi Gagal',
-              'Pilihan ${_labels[j]} pada soal ke-${i + 1} belum diisi.',
+              'Pilihan ${ManualQuizQuestionsView.labels[j]} pada soal ke-${i + 1} belum diisi.',
               snackPosition: SnackPosition.BOTTOM);
           return false;
         }
@@ -285,8 +286,15 @@ class _ManualQuizQuestionsViewState extends State<ManualQuizQuestionsView> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               itemCount: _questions.length,
-              itemBuilder: (ctx, index) =>
-                  _buildQuestionCard(index),
+              itemBuilder: (ctx, index) => QuestionCard(
+                index: index,
+                q: _questions[index],
+                onRemove: () => _removeQuestion(index),
+                onQuestionChanged: (v) => setState(() => _questions[index].pertanyaan = v),
+                onOptionChanged: (optionIndex, v) => setState(() => _questions[index].pilihan[optionIndex] = v),
+                onAnswerChanged: (j) => setState(() => _questions[index].kunciJawaban = j),
+                onExplanationChanged: (v) => setState(() => _questions[index].penjelasan = v),
+              ),
             ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
@@ -377,212 +385,6 @@ class _ManualQuizQuestionsViewState extends State<ManualQuizQuestionsView> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuestionCard(int index) {
-    final q = _questions[index];
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: AppColors.darkPurple,
-              borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  'Soal ${index + 1}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline,
-                      color: Colors.white70, size: 20),
-                  onPressed: () => _removeQuestion(index),
-                  tooltip: 'Hapus soal',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Pertanyaan
-                const Text('Pertanyaan',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14)),
-                const Gap(8),
-                TextFormField(
-                  initialValue: q.pertanyaan,
-                  maxLines: 3,
-                  onChanged: (v) => setState(() => q.pertanyaan = v),
-                  decoration: _inputDec(
-                      hint: 'Tulis pertanyaan soal ${index + 1}...'),
-                ),
-                const Gap(20),
-
-                // Pilihan jawaban
-                const Text('Pilihan Jawaban',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14)),
-                const Gap(12),
-                ...List.generate(4, (j) => _buildOptionField(index, j)),
-                const Gap(16),
-
-                // Kunci jawaban
-                const Text('Kunci Jawaban',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14)),
-                const Gap(10),
-                Row(
-                  children: List.generate(4, (j) {
-                    final isSelected = q.kunciJawaban == j;
-                    return GestureDetector(
-                      onTap: () => setState(() => q.kunciJawaban = j),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        margin: const EdgeInsets.only(right: 12),
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primaryPurple
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.primaryPurple
-                                : AppColors.grey300,
-                            width: 2,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                      color: AppColors.primaryPurple
-                                          .withValues(alpha: 0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3))
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: Text(
-                            _labels[j],
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.grey500),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                const Gap(20),
-
-                // Penjelasan opsional
-                const Text('Penjelasan (Opsional)',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14)),
-                const Gap(8),
-                TextFormField(
-                  initialValue: q.penjelasan,
-                  maxLines: 2,
-                  onChanged: (v) => setState(() => q.penjelasan = v),
-                  decoration: _inputDec(
-                      hint: 'Tambahkan pembahasan jawaban...'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptionField(int questionIndex, int optionIndex) {
-    final q = _questions[questionIndex];
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.lightPurple,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                _labels[optionIndex],
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryPurple),
-              ),
-            ),
-          ),
-          const Gap(10),
-          Expanded(
-            child: TextFormField(
-              initialValue: q.pilihan[optionIndex],
-              onChanged: (v) =>
-                  setState(() => q.pilihan[optionIndex] = v),
-              decoration:
-                  _inputDec(hint: 'Opsi ${_labels[optionIndex]}'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  InputDecoration _inputDec({String? hint}) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: const Color(0xFFF8FAFC),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-            color: AppColors.primaryPurple, width: 1.5),
       ),
     );
   }

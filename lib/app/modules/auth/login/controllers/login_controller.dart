@@ -3,10 +3,9 @@ import 'package:get/get.dart';
 import 'package:clevora/app/routes/app_routes.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/data/repositories/auth_repository.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:clevora/app/data/models/user_model.dart';
-import 'package:clevora/app/widgets/camera_dialog.dart';
+import 'package:clevora/app/widgets/smart_camera_dialog.dart';
 
 class LoginController extends GetxController {
   final selectedRole = 'guru'.obs;
@@ -33,7 +32,6 @@ class LoginController extends GetxController {
 
   final AuthRepository authRepo = Get.find<AuthRepository>();
   final AuthService _authService = Get.find<AuthService>();
-  final GetStorage _storage = GetStorage();
 
   @override
   void onInit() {
@@ -84,7 +82,7 @@ class LoginController extends GetxController {
         if (user != null && !user.sudahDaftarWajah) {
           isLoading.value = false; // Set false before showing dialog so UI updates
           await Get.dialog<bool>(
-            const CameraDialog(
+            const SmartCameraDialog(
               title: 'Daftarkan Wajah',
               isRegistration: true,
             ),
@@ -172,7 +170,7 @@ class LoginController extends GetxController {
           if (!user.sudahDaftarWajah) {
             isGoogleLoading.value = false; // Set false before dialog
             await Get.dialog<bool>(
-              const CameraDialog(
+              const SmartCameraDialog(
                 title: 'Daftarkan Wajah',
                 isRegistration: true,
               ),

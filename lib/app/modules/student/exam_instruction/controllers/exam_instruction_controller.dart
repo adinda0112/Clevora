@@ -4,7 +4,7 @@ import 'package:clevora/app/data/models/quiz_model.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/data/services/quiz_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
-import 'package:clevora/app/widgets/camera_dialog.dart';
+import 'package:clevora/app/widgets/smart_camera_dialog.dart';
 
 class ExamInstructionController extends GetxController {
   final QuizService _quizService = Get.find<QuizService>();
@@ -35,27 +35,36 @@ class ExamInstructionController extends GetxController {
       final resultData = await _quizService.startQuiz(fullQuiz.id);
       final resultId = resultData['_id'] ?? resultData['id'] ?? '';
 
-      // 3. Check if student has registered face
-      final user = _authService.currentUser.value;
-      if (user != null && !user.sudahDaftarWajah) {
-        Get.snackbar(
-          'Registrasi Wajah Diperlukan',
-          'Silakan daftarkan wajah Anda terlebih dahulu.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: const Color(0xFFFF9800),
-          colorText: const Color(0xFFFFFFFF),
-          duration: const Duration(seconds: 4),
+      final title = fullQuiz.judul.toLowerCase();
+      // Proctoring (dan verifikasi) hanya aktif untuk ujian, bukan pretest/posttest
+      final isProctoringActive = !title.contains('pretest') && !title.contains('posttest');
+
+      bool isVerified = true;
+
+      if (isProctoringActive) {
+        // 3. Check if student has registered face
+        final user = _authService.currentUser.value;
+        if (user != null && !user.sudahDaftarWajah) {
+          Get.snackbar(
+            'Registrasi Wajah Diperlukan',
+            'Silakan daftarkan wajah Anda terlebih dahulu.',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: const Color(0xFFFF9800),
+            colorText: const Color(0xFFFFFFFF),
+            duration: const Duration(seconds: 4),
+          );
+          return;
+        }
+
+        // 4. Trigger face verification dialog
+        final dialogResult = await Get.dialog<bool>(
+          const SmartCameraDialog(title: 'Verifikasi Wajah Sebelum Mulai'),
+          barrierDismissible: false,
         );
-        return;
+        isVerified = dialogResult ?? false;
       }
 
-      // 4. Trigger face verification dialog
-      final isVerified = await Get.dialog<bool>(
-        const CameraDialog(title: 'Verifikasi Wajah Sebelum Mulai'),
-        barrierDismissible: false,
-      );
-
-      if (isVerified == true) {
+      if (isVerified) {
         Get.offNamed(
           Routes.STUDENT_EXAM,
           arguments: {

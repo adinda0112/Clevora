@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'app/routes/app_pages.dart';
-import 'app/routes/app_routes.dart';
-import 'app/theme/app_theme.dart';
+import 'package:clevora/app/routes/app_pages.dart';
+import 'package:clevora/app/routes/app_routes.dart';
+import 'package:clevora/app/theme/app_theme.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/data/services/module_service.dart';
@@ -16,9 +19,11 @@ import 'package:clevora/app/data/services/profil_service.dart';
 import 'package:clevora/app/data/providers/api_provider.dart';
 import 'package:clevora/app/data/repositories/auth_repository.dart';
 import 'package:clevora/app/data/models/user_model.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  await initializeDateFormatting('id_ID', null);
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -38,18 +43,21 @@ void main() async {
   Get.lazyPut(() => AttendanceService(), fenix: true);
   Get.lazyPut(() => HasilService(), fenix: true);
   Get.lazyPut(() => ProfilService(), fenix: true);
-  runApp(ClevoraApp(initialRoute: getInitialRoute()));
+  
+  String initRoute = await getInitialRoute();
+  runApp(ClevoraApp(initialRoute: initRoute));
 }
 
-String getInitialRoute() {
-  final storage = GetStorage();
-  final userMap = storage.read('user');
+Future<String> getInitialRoute() async {
+  final secureStorage = const FlutterSecureStorage();
+  final userString = await secureStorage.read(key: 'user');
 
-  if (userMap == null) {
+  if (userString == null) {
     return AppPages.INITIAL; // Which is Routes.SPLASH
   }
 
   try {
+    final userMap = jsonDecode(userString);
     final user = UserModel.fromJson(userMap);
     
     if (!user.isProfileComplete) {

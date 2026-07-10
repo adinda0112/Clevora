@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:clevora/app/data/services/auth_service.dart';
 import 'package:clevora/app/routes/app_routes.dart';
-import 'package:clevora/app/widgets/camera_dialog.dart';
+import 'package:clevora/app/widgets/smart_camera_dialog.dart';
 
 class CompleteProfileController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -79,7 +79,7 @@ class CompleteProfileController extends GetxController {
         final userAfterUpdate = _authService.currentUser.value;
         if (userAfterUpdate != null && !userAfterUpdate.sudahDaftarWajah) {
           await Get.dialog<bool>(
-            const CameraDialog(
+            const SmartCameraDialog(
               title: 'Daftarkan Wajah',
               isRegistration: true,
             ),

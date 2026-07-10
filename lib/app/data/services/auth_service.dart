@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -10,7 +11,6 @@ import 'package:clevora/app/routes/app_routes.dart';
 class AuthService extends GetxService {
   final ApiProvider _apiProvider = Get.find<ApiProvider>();
   final AuthRepository _authRepository = Get.find<AuthRepository>();
-  final GetStorage _storage = GetStorage();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   
   final currentUser = Rxn<UserModel>();
@@ -29,14 +29,15 @@ class AuthService extends GetxService {
       rxToken.value = savedToken;
     }
 
-    final savedUser = _storage.read('user');
-    if (savedUser != null) {
+    final savedUserString = await _secureStorage.read(key: 'user');
+    if (savedUserString != null) {
       try {
+        final savedUser = jsonDecode(savedUserString);
         currentUser.value = UserModel.fromJson(savedUser);
         isAuthenticated.value = true;
       } catch (_) {
         // Handle malformed cached data
-        _storage.remove('user');
+        await _secureStorage.delete(key: 'user');
       }
     }
   }
@@ -47,7 +48,7 @@ class AuthService extends GetxService {
     if (authResponse.token != null && authResponse.user != null) {
       await _secureStorage.write(key: 'token', value: authResponse.token);
       rxToken.value = authResponse.token!;
-      _storage.write('user', authResponse.user!.toJson());
+      await _secureStorage.write(key: 'user', value: jsonEncode(authResponse.user!.toJson()));
       currentUser.value = authResponse.user;
       isAuthenticated.value = true;
     }
@@ -202,7 +203,7 @@ class AuthService extends GetxService {
         } else {
           user = UserModel.fromJson(data);
         }
-        await _storage.write('user', user.toJson());
+        await _secureStorage.write(key: 'user', value: jsonEncode(user.toJson()));
         currentUser.value = user;
         isAuthenticated.value = true;
         return user;
@@ -227,7 +228,7 @@ class AuthService extends GetxService {
       
       if (response.data['success'] == true) {
         final updatedUser = UserModel.fromJson(response.data['data']);
-        await _storage.write('user', updatedUser.toJson());
+        await _secureStorage.write(key: 'user', value: jsonEncode(updatedUser.toJson()));
         currentUser.value = updatedUser;
       } else {
         throw response.data['message'] ?? 'Gagal memperbarui profil';
@@ -240,14 +241,14 @@ class AuthService extends GetxService {
   }
 
   Future<void> updateCurrentUserState(UserModel updatedUser) async {
-    await _storage.write('user', updatedUser.toJson());
+    await _secureStorage.write(key: 'user', value: jsonEncode(updatedUser.toJson()));
     currentUser.value = updatedUser;
   }
 
   Future<void> logout() async {
     await _secureStorage.delete(key: 'token');
+    await _secureStorage.delete(key: 'user');
     rxToken.value = '';
-    _storage.remove('user');
     currentUser.value = null;
     isAuthenticated.value = false;
     Get.offAllNamed(Routes.LOGIN);

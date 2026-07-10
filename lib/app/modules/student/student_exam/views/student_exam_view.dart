@@ -63,7 +63,10 @@ class StudentExamView extends GetView<StudentExamController> {
                 children: [
                   // Camera / Proctoring Feed
                   Obx(() {
-                    if (controller.isProctoringActive && controller.isCameraInitialized.value && controller.cameraController != null) {
+                    // Selalu baca .value agar GetX mendeteksi observable, mencegah error "improper use of GetX" saat isProctoringActive false (Pretest)
+                    final isCameraReady = controller.isCameraInitialized.value;
+                    
+                    if (controller.isProctoringActive && isCameraReady && controller.cameraController != null) {
                       return Container(
                         width: 80,
                         height: 100,

@@ -17,11 +17,11 @@ class TeacherBottomNav extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       items: const [
-        NavItem(icon: Icons.home_filled, label: 'Dashboard'),
+        NavItem(icon: Icons.home_filled, label: 'Beranda'),
         NavItem(icon: Icons.smart_toy_outlined, label: 'Modul AI'),
-        NavItem(icon: Icons.quiz_outlined, label: 'Quiz'),
-        NavItem(icon: Icons.bar_chart_outlined, label: 'Report'),
-        NavItem(icon: Icons.person_outline, label: 'Profile'),
+        NavItem(icon: Icons.quiz_outlined, label: 'Kuis'),
+        NavItem(icon: Icons.bar_chart_outlined, label: 'Laporan'),
+        NavItem(icon: Icons.person_outline, label: 'Profil'),
       ],
     );
   }

@@ -224,7 +224,7 @@ class QuizManagementView extends GetView<QuizManagementController> {
         onPressed: () => _showCreateOptions(context),
         backgroundColor: const Color.fromARGB(255, 60, 52, 137),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('CREATE NOW',
+        label: const Text('BUAT KUIS',
             style:
                 TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
